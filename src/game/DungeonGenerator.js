@@ -1,5 +1,7 @@
 import FieldTypes from './FieldTypes';
-import { randomBetween } from '../utils/Random';
+import { randomBetween } from '../utils/MathUtils';
+import { shuffle } from '../utils/ArrayUtils';
+import { createRandomRoom } from './RoomGenerator';
 
 function initMap(width, height) {
     const map = [];
@@ -12,7 +14,7 @@ function initMap(width, height) {
     return map;
 }
 
-function createRoom(x, y, width, height) {
+function findPosition(x, y) {
     let halfWidth = width / 2;
     let halfHeight = height / 2;
     let widthIsWhole = true;
@@ -26,36 +28,6 @@ function createRoom(x, y, width, height) {
 
     let left = x - ((widthIsWhole) ? Math.floor(halfWidth - 1) : Math.floor(halfWidth));
     let right = x + Math.floor(halfWidth);
-
-    return {top, left, bottom, right};
-}
-
-function createSmallRoom(x, y) {
-    let width = Math.floor(randomBetween(3,6));
-    let height = Math.floor(randomBetween(3,6));
-    return createRoom(x, y, width, height);
-}
-
-function createMediumRoom(x, y) {
-    let width = Math.floor(randomBetween(6, 9));
-    let height = Math.floor(randomBetween(6, 9));
-    return createRoom(x, y, width, height);
-}
-
-function createLargeRoom(x, y) {
-    let width = Math.floor(randomBetween(9, 12));
-    let height = Math.floor(randomBetween(9, 12));
-    return createRoom(x, y, width, height);
-}
-
-function createRandomRoom(x, y) {
-    let possibilities = {
-        0: createSmallRoom,
-        1: createMediumRoom,
-        2: createLargeRoom
-    };
-    let sel = Math.floor(randomBetween(0, 3));
-    return possibilities[sel](x, y);
 }
 
 function outOfMapBounds(room, map) {
@@ -67,10 +39,12 @@ function outOfMapBounds(room, map) {
     );
 }
 
-function placeRoom(room, map) {
+function placeRoom(x, y, room, map) {
     if (outOfMapBounds(room, map)) {
         throw new Error('Room is out of map bounds.');
     }
+
+    let position = findPosition(x, y, room);
 
     let newMap = map.map(row => row.slice());
     for (let h = room.top; h <= room.bottom; h++) {
@@ -81,6 +55,31 @@ function placeRoom(room, map) {
     }
 
     return newMap;
+}
+
+placeRandomAdjacentRoom(room) {
+
+}
+
+function buildRooms(rooms) {
+    let newRooms = rooms.slice();
+    let furtherRoomsPossible = true;
+
+    while (furtherRoomsPossible) {
+        let len = newRooms.length;
+
+        for (let l = 0; l < len; l++) {
+            let room = newRooms[l];
+            let nextRoom = placeRandomAdjacentRoom(room);
+            if (!nextRoom) continue;
+
+        }
+
+        newRooms = shuffle(newRooms);
+        if (len === newRooms.length) furtherRoomsPossible = false;
+    }
+
+    return newRooms;
 }
 
 function DungeonGenerator(width = 160, height = 90, level = 1) {
@@ -94,6 +93,16 @@ function DungeonGenerator(width = 160, height = 90, level = 1) {
     //  8. Go back to step 3, until the dungeon is complete
     //  9. Add the up and down staircases at random points in map
     // 10. Finally, sprinkle some monsters and items liberally over dungeon
+
+    // 1. fill map
+    // 2. center room
+    // 3. shuffle walls of room
+    // 4. pick wall
+    // 5. create new room
+    // 6. see if fits
+    // 7. if not fit, back to 4, if fits continue
+    // 8. place new room,
+    // 9. continue at 3 with this room
 
     if (width < 14 || height < 14) {
         throw new Error('Width and height of the dungeon must at least be 14');
@@ -110,10 +119,13 @@ function DungeonGenerator(width = 160, height = 90, level = 1) {
         y: Math.floor(mapHeight / 2)
     };
 
-    let newRoom = createRandomRoom(center.x, center.y);
+    let newRoom = createRandomRoom();
     map = placeRoom(newRoom, map);
-    return { map, level };
+    rooms.push(newRoom);
 
+    rooms = buildRooms(rooms);
+
+    return { map, level };
     // return { map, level, enemies, weapons, exit, boss };
 }
 
