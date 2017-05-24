@@ -14,42 +14,30 @@ function initMap(width, height) {
     return map;
 }
 
-function findPosition(x, y) {
-    let halfWidth = width / 2;
-    let halfHeight = height / 2;
-    let widthIsWhole = true;
-    let heightIsWhole = true;
-
-    if (halfWidth % 1 !== 0) widthIsWhole = false;
-    if (halfHeight % 1 !== 0) heightIsWhole = false;
-
-    let top = y - ((heightIsWhole) ? Math.floor(halfHeight - 1) : Math.floor(halfHeight));
-    let bottom = y + Math.floor(halfHeight);
-
-    let left = x - ((widthIsWhole) ? Math.floor(halfWidth - 1) : Math.floor(halfWidth));
-    let right = x + Math.floor(halfWidth);
-}
-
 function outOfMapBounds(room, map) {
+    let pos = room.getPosition();
     return (
-        room.top < 0 || room.top >= map.length ||
-        room.bottom < 0 || room.bottom >= map.length ||
-        room.left < 0 || room.left >= map.length ||
-        room.right < 0 || room.right >= map.length
+        pos.top < 0 || pos.top >= map.length ||
+        pos.bottom < 0 || pos.bottom >= map.length ||
+        pos.left < 0 || pos.left >= map[0].length ||
+        pos.right < 0 || pos.right >= map[0].length
     );
 }
 
-function placeRoom(x, y, room, map) {
+function placeRoom(room, map) {
     if (outOfMapBounds(room, map)) {
         throw new Error('Room is out of map bounds.');
     }
 
-    let position = findPosition(x, y, room);
+    let pos = room.getPosition();
 
     let newMap = map.map(row => row.slice());
-    for (let h = room.top; h <= room.bottom; h++) {
-        for (let w = room.left; w <= room.right; w++) {
-            if (newMap[h][w] !== FieldTypes.Types.rock) throw new Error('Space already occupied.');
+    for (let h = pos.top; h <= pos.bottom; h++) {
+        for (let w = pos.left; w <= pos.right; w++) {
+            if (newMap[h][w] !== FieldTypes.Types.rock) {
+                console.log(w, h, FieldTypes.TypesByCode[newMap[h][w]]);
+                throw new Error('Space already occupied.');
+            }
             newMap[h][w] = FieldTypes.Types.earth;
         }
     }
@@ -57,43 +45,78 @@ function placeRoom(x, y, room, map) {
     return newMap;
 }
 
-placeRandomAdjacentRoom(room) {
+function pickRandomWall(fromPos, wall) {
+    let x, y;
+    switch(wall) {
+        case 'top':
+        case 'bottom':
+        x = Math.floor(randomBetween(fromPos.left + 1, fromPos.right - 1));
+        y = fromPos[wall];
+        break;
 
+        case 'right':
+        case 'left':
+        x = fromPos[wall];
+        y = Math.floor(randomBetween(fromPos.top + 1, fromPos.bottom - 1));
+        break;
+
+        default:
+        throw new Error('A wrong type of wall was provided.');
+    }
+    return {x, y};
 }
 
-function buildRooms(rooms) {
-    let newRooms = rooms.slice();
-    let furtherRoomsPossible = true;
-
-    while (furtherRoomsPossible) {
-        let len = newRooms.length;
-
-        for (let l = 0; l < len; l++) {
-            let room = newRooms[l];
-            let nextRoom = placeRandomAdjacentRoom(room);
-            if (!nextRoom) continue;
-
+function findNextPosition(nextRoom, wallPosition, wallDirection) {
+    if (wallDirection === 'left') {
+        return {
+            y: wallPosition.y,
+            x: wallPosition.x - 1 - Math.ceil(nextRoom.width / 2)
         }
-
-        newRooms = shuffle(newRooms);
-        if (len === newRooms.length) furtherRoomsPossible = false;
     }
+    if (wallDirection === 'right') {
+        return {
+            y: wallPosition.y,
+            x: wallPosition.x + 1 + Math.floor(nextRoom.width / 2)
+        }
+    }
+    if (wallDirection === 'top') {
+        return {
+            y: wallPosition.y - 1 - Math.ceil(nextRoom.height / 2),
+            x: wallPosition.x
+        }
+    }
+    if (wallDirection === 'bottom') {
+        return {
+            y: wallPosition.y + 1 + Math.floor(nextRoom.height / 2),
+            x: wallPosition.x
+        }
+    }
+}
 
-    return newRooms;
+function buildNextRoom(startingRoom, map, depth) {
+    if (depth > 1) return;
+    let pos = startingRoom.getPosition();
+    let shuffledWalls = shuffle(['top', 'right', 'bottom', 'left']);
+    let newMap = map.splice();
+    for (let i = 0; i < shuffledWalls.length; i++) {
+        let wallField = pickRandomWall(pos, shuffledWalls[i]);
+        let nextRoom = createRandomRoom();
+        try {
+            let newPos = findNextPosition(nextRoom, wallField, shuffledWalls[i]);
+            nextRoom.setX(newPos.x);
+            nextRoom.setY(newPos.y);
+            newMap = placeRoom(nextRoom, map);
+            buildNextRoom(nextRoom, map, depth + 1);
+        } catch (e) {
+            console.log(e.message, shuffledWalls[i]);
+            console.log(startingRoom.getPosition(), startingRoom.width, startingRoom.height);
+            console.log(nextRoom.getPosition(), nextRoom.width, nextRoom.height);
+            continue;
+        }
+    }
 }
 
 function DungeonGenerator(width = 160, height = 90, level = 1) {
-    //  1. Fill the whole map with solid earth
-    //  2. Dig out a single room in the centre of the map
-    //  3. Pick a wall of any room
-    //  4. Decide upon a new feature to build
-    //  5. See if there is room to add the new feature through the chosen wall
-    //  6. If yes, continue. If no, go back to step 3
-    //  7. Add the feature through the chosen wall
-    //  8. Go back to step 3, until the dungeon is complete
-    //  9. Add the up and down staircases at random points in map
-    // 10. Finally, sprinkle some monsters and items liberally over dungeon
-
     // 1. fill map
     // 2. center room
     // 3. shuffle walls of room
@@ -114,16 +137,14 @@ function DungeonGenerator(width = 160, height = 90, level = 1) {
     let map = initMap(mapWidth, mapHeight);
     let rooms = [];
 
-    const center = {
-        x: Math.floor(mapWidth / 2),
-        y: Math.floor(mapHeight / 2)
-    };
+    let x = Math.floor(mapWidth / 2);
+    let y = Math.floor(mapHeight / 2);
 
-    let newRoom = createRandomRoom();
+    let newRoom = createRandomRoom(x, y);
     map = placeRoom(newRoom, map);
-    rooms.push(newRoom);
 
-    rooms = buildRooms(rooms);
+    buildNextRoom(newRoom, map, 0);
+
 
     return { map, level };
     // return { map, level, enemies, weapons, exit, boss };
