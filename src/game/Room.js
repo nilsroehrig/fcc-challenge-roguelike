@@ -1,10 +1,12 @@
+import {randomBetween} from '../utils/MathUtils';
+
 class Room {
     constructor(width, height, x = 0, y = 0) {
         this.width = width;
         this.height = height;
         this.x = x;
         this.y = y;
-        this.position = undefined;
+        this._internalSetPosition();
     }
 
     _internalSetPosition() {
@@ -30,10 +32,12 @@ class Room {
 
     setWidth(width) {
         this.width = width;
+        this._internalSetPosition();
     }
 
     setHeight(height) {
         this.height = height;
+        this._internalSetPosition();
     }
 
     setX(x) {
@@ -47,11 +51,34 @@ class Room {
     }
 
     getPosition() {
-        if (!this.position) {
-            this._internalSetPosition();
-        }
-
         return this.position;
+    }
+
+    getRandomWall(direction) {
+        let x, y;
+        switch (direction) {
+            case 'top':
+            x = Math.floor(randomBetween(this.position.left + 1, this.position.right - 1));
+            y = this.position.top - 1;
+            break;
+
+            case 'right':
+            x = this.position.right + 1;
+            y = Math.floor(randomBetween(this.position.top + 1, this.position.bottom -1));
+            break;
+
+            case 'bottom':
+            x = Math.floor(randomBetween(this.position.left + 1, this.position.right - 1));
+            y = this.position.bottom + 1;
+            break;
+
+            case 'left':
+            case 'default':
+            x = this.position.left - 1;
+            y = Math.floor(randomBetween(this.position.top + 1, this.position.bottom -1));
+            break;
+        }
+        return { direction, x, y };
     }
 }
 

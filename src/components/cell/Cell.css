@@ -1,4 +1,6 @@
 .Cell {
+    box-sizing: border-box;
+    border: solid thin black;
     width: 7px;
     height: 7px;
 }
@@ -9,4 +11,8 @@
 
 .Cell--earth {
     background-color: #fff;
+}
+
+.Cell--enemy {
+    background-color: #f00;
 }

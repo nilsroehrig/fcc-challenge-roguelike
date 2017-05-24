@@ -2,20 +2,20 @@ import { randomBetween } from '../utils/MathUtils';
 import Room from './Room';
 
 function createSmallRoom(x, y) {
-    let width = Math.floor(randomBetween(3,6));
-    let height = Math.floor(randomBetween(3,6));
+    let width = Math.floor(randomBetween(5,10));
+    let height = Math.floor(randomBetween(5,10));
     return new Room(width, height, x, y);
 }
 
 function createMediumRoom(x, y) {
-    let width = Math.floor(randomBetween(6, 9));
-    let height = Math.floor(randomBetween(6, 9));
+    let width = Math.floor(randomBetween(8, 13));
+    let height = Math.floor(randomBetween(8, 13));
     return new Room(width, height, x, y);
 }
 
 function createLargeRoom(x, y) {
-    let width = Math.floor(randomBetween(9, 12));
-    let height = Math.floor(randomBetween(9, 12));
+    let width = Math.floor(randomBetween(11, 16));
+    let height = Math.floor(randomBetween(11, 16));
     return new Room(width, height, x, y);
 }
 

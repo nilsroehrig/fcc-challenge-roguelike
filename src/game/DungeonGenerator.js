@@ -17,10 +17,10 @@ function initMap(width, height) {
 function outOfMapBounds(room, map) {
     let pos = room.getPosition();
     return (
-        pos.top < 0 || pos.top >= map.length ||
-        pos.bottom < 0 || pos.bottom >= map.length ||
-        pos.left < 0 || pos.left >= map[0].length ||
-        pos.right < 0 || pos.right >= map[0].length
+        pos.top < 1 || pos.top >= map.length - 1 ||
+        pos.bottom < 1 || pos.bottom >= map.length - 1 ||
+        pos.left < 1 || pos.left >= map[0].length - 1 ||
+        pos.right < 1 || pos.right >= map[0].length - 1
     );
 }
 
@@ -35,7 +35,6 @@ function placeRoom(room, map) {
     for (let h = pos.top; h <= pos.bottom; h++) {
         for (let w = pos.left; w <= pos.right; w++) {
             if (newMap[h][w] !== FieldTypes.Types.rock) {
-                console.log(w, h, FieldTypes.TypesByCode[newMap[h][w]]);
                 throw new Error('Space already occupied.');
             }
             newMap[h][w] = FieldTypes.Types.earth;
@@ -45,78 +44,63 @@ function placeRoom(room, map) {
     return newMap;
 }
 
-function pickRandomWall(fromPos, wall) {
-    let x, y;
-    switch(wall) {
-        case 'top':
-        case 'bottom':
-        x = Math.floor(randomBetween(fromPos.left + 1, fromPos.right - 1));
-        y = fromPos[wall];
-        break;
+function findNextPosition(width, height, randomWall) {
+    let { direction, x, y } = randomWall;
 
-        case 'right':
-        case 'left':
-        x = fromPos[wall];
-        y = Math.floor(randomBetween(fromPos.top + 1, fromPos.bottom - 1));
-        break;
-
-        default:
-        throw new Error('A wrong type of wall was provided.');
-    }
-    return {x, y};
-}
-
-function findNextPosition(nextRoom, wallPosition, wallDirection) {
-    if (wallDirection === 'left') {
+    if (direction === 'top') {
         return {
-            y: wallPosition.y,
-            x: wallPosition.x - 1 - Math.ceil(nextRoom.width / 2)
+            x: x,
+            y: Math.ceil(y - 1 - (height / 2)),
         }
     }
-    if (wallDirection === 'right') {
+
+    if (direction === 'bottom') {
         return {
-            y: wallPosition.y,
-            x: wallPosition.x + 1 + Math.floor(nextRoom.width / 2)
+            x: x,
+            y: Math.floor(y + 1 + height / 2),
         }
     }
-    if (wallDirection === 'top') {
+
+    if (direction === 'left') {
         return {
-            y: wallPosition.y - 1 - Math.ceil(nextRoom.height / 2),
-            x: wallPosition.x
+            x: Math.ceil(x - 1 - (width / 2)),
+            y: y
         }
     }
-    if (wallDirection === 'bottom') {
+
+    if (direction === 'right') {
         return {
-            y: wallPosition.y + 1 + Math.floor(nextRoom.height / 2),
-            x: wallPosition.x
+            x: Math.floor(x + 1 + (width / 2)),
+            y: y
         }
     }
 }
 
 function buildNextRoom(startingRoom, map, depth) {
-    if (depth > 1) return;
     let pos = startingRoom.getPosition();
-    let shuffledWalls = shuffle(['top', 'right', 'bottom', 'left']);
-    let newMap = map.splice();
+    // let shuffledWalls = shuffle(['top', 'bottom', 'left', 'right']);
+    let shuffledWalls = shuffle(['bottom', 'right']);
+    let newMap = map.map(row => row.slice());
     for (let i = 0; i < shuffledWalls.length; i++) {
-        let wallField = pickRandomWall(pos, shuffledWalls[i]);
+        let randomWall = startingRoom.getRandomWall(shuffledWalls[i]);
         let nextRoom = createRandomRoom();
         try {
-            let newPos = findNextPosition(nextRoom, wallField, shuffledWalls[i]);
+            let newPos = findNextPosition(nextRoom.width, nextRoom.height, randomWall);
             nextRoom.setX(newPos.x);
             nextRoom.setY(newPos.y);
-            newMap = placeRoom(nextRoom, map);
-            buildNextRoom(nextRoom, map, depth + 1);
+            newMap = placeRoom(nextRoom, newMap);
+            newMap[randomWall.y][randomWall.x] = FieldTypes.Types.enemy;
         } catch (e) {
-            console.log(e.message, shuffledWalls[i]);
-            console.log(startingRoom.getPosition(), startingRoom.width, startingRoom.height);
-            console.log(nextRoom.getPosition(), nextRoom.width, nextRoom.height);
             continue;
         }
+
+        newMap = buildNextRoom(nextRoom, newMap, depth + 1);
     }
+
+    return newMap;
 }
 
-function DungeonGenerator(width = 160, height = 90, level = 1) {
+function DungeonGenerator(width = 101, height = 61, level = 1) {
     // 1. fill map
     // 2. center room
     // 3. shuffle walls of room
@@ -133,7 +117,6 @@ function DungeonGenerator(width = 160, height = 90, level = 1) {
 
     const mapWidth = width;
     const mapHeight = height;
-    console.log('types', FieldTypes);
     let map = initMap(mapWidth, mapHeight);
     let rooms = [];
 
@@ -143,7 +126,7 @@ function DungeonGenerator(width = 160, height = 90, level = 1) {
     let newRoom = createRandomRoom(x, y);
     map = placeRoom(newRoom, map);
 
-    buildNextRoom(newRoom, map, 0);
+    map = buildNextRoom(newRoom, map, 0);
 
 
     return { map, level };
