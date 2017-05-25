@@ -1,8 +1,7 @@
 .Cell {
     box-sizing: border-box;
-    border: solid thin black;
-    width: 7px;
-    height: 7px;
+    width: 14px;
+    height: 14px;
 }
 
 .Cell--rock {
@@ -13,6 +12,49 @@
     background-color: #fff;
 }
 
-.Cell--enemy {
-    background-color: #f00;
+.Cell--enemy,
+.Cell--boss,
+.Cell--player,
+.Cell--health,
+.Cell--weapon,
+.Cell--exit {
+    border-radius: 50%;
+}
+
+.Cell--enemy,
+.Cell--boss {
+    background-color: #c00;
+}
+
+.Cell--boss {
+    position: relative;
+}
+
+.Cell--boss::after {
+    content: '';
+    display: block;
+    position: absolute;
+    width: 28px;
+    height: 28px;
+    left: -8px;
+    top: -8px;
+    background-color: transparent;
+    border-radius: 50%;
+    border: solid thin #f00;
+}
+
+.Cell--player {
+    background-color: #00c;
+}
+
+.Cell--health {
+    background-color: #0c0;
+}
+
+.Cell--weapon {
+    background-color: gold;
+}
+
+.Cell--exit {
+    background-color: purple;
 }

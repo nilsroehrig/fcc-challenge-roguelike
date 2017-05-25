@@ -73,7 +73,7 @@ class Room {
             break;
 
             case 'left':
-            case 'default':
+            default:
             x = this.position.left - 1;
             y = Math.floor(randomBetween(this.position.top + 1, this.position.bottom -1));
             break;
