@@ -102,9 +102,26 @@ function getFreeFields(map) {
     return freeFields;
 }
 
-function setRandomFreeFields(map, number, type) {
+function hasOnlyFreeNeighbours(x, y, map) {
+    let passed = true;
+    let debugOutput = [];
+
+    for (let h = y - 1; h <= y + 1; h++) {
+        for (let w = x - 1; w <= x + 1; w++) {
+            if (w === x && y === h) continue;
+            passed = passed && (map[h][w] === FieldTypes.Types.earth);
+        }
+    }
+    return passed;
+}
+
+function getFreeFieldsWithFreeNeighbors(map) {
+    return getFreeFields(map).filter(field => hasOnlyFreeNeighbours(field.x, field.y, map));
+}
+
+function setRandomFreeFieldsToType(map, number, type) {
     let newMap = map.map(row => row.slice());
-    let freeFields = shuffle(getFreeFields(newMap));
+    let freeFields = shuffle(getFreeFieldsWithFreeNeighbors(newMap));
     let max = (freeFields.length > number) ? number : freeFields.length;
     for (let i = 0; i < max; i++) {
         newMap[freeFields[i].y][freeFields[i].x] = type;
@@ -113,30 +130,30 @@ function setRandomFreeFields(map, number, type) {
 }
 
 function spawnPlayer(map) {
-    return setRandomFreeFields(map, 1, FieldTypes.Types.player);
+    return setRandomFreeFieldsToType(map, 1, FieldTypes.Types.player);
 }
 
 function spawnBoss(map) {
-    return setRandomFreeFields(map, 1, FieldTypes.Types.boss);
+    return setRandomFreeFieldsToType(map, 1, FieldTypes.Types.boss);
 }
 
 function spawnExit(map) {
-    return setRandomFreeFields(map, 1, FieldTypes.Types.exit);
+    return setRandomFreeFieldsToType(map, 1, FieldTypes.Types.exit);
 }
 
 function spawnWeapon(map) {
-    return setRandomFreeFields(map, 1, FieldTypes.Types.weapon);
+    return setRandomFreeFieldsToType(map, 1, FieldTypes.Types.weapon);
 }
 
 function spawnHealth(map, number) {
-    return setRandomFreeFields(map, number, FieldTypes.Types.health);
+    return setRandomFreeFieldsToType(map, number, FieldTypes.Types.health);
 }
 
 function spawnEnemies(map, number) {
-    return setRandomFreeFields(map, number, FieldTypes.Types.enemy);
+    return setRandomFreeFieldsToType(map, number, FieldTypes.Types.enemy);
 }
 
-function DungeonGenerator(width = 91, height = 55, level = 1) {
+function DungeonGenerator(width = 81, height = 51, level = 1) {
     if (width < 14 || height < 14) {
         throw new Error('Width and height of the dungeon must at least be 14');
     }
