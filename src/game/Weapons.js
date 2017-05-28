@@ -1,5 +1,5 @@
 import { randomIntBetween } from '../utils/MathUtils';
-export const Weapons = [{
+const Weapons = [{
         name: 'Bare Hands',
         attack: 0
     }, {
@@ -19,3 +19,7 @@ export const Weapons = [{
         attack: randomIntBetween(50, 71)
     }
 ];
+
+export function getWeapon(index) {
+    return Weapons[index];
+}
