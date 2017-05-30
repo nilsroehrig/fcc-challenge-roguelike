@@ -1,14 +1,18 @@
 import FieldTypes from './FieldTypes';
-import { shuffle } from '../utils/ArrayUtils';
+import { shuffle, shuffleImmutable } from '../utils/ArrayUtils';
 import { createRandomRoom } from './RoomGenerator';
 import { randomIntBetween } from '../utils/MathUtils';
+
+function cloneMap(map) {
+    return map.map(row => row.map(field => field));
+}
 
 function initMap(width, height) {
     const map = [];
     for (let h = 0; h < height; h++) {
         map[h] = [];
         for (let w = 0; w < width; w++) {
-            map[h][w] = FieldTypes.Types.rock;
+            map[h][w] = {type: FieldTypes.Types.rock, x: w, y: h};
         }
     }
     return map;
@@ -31,13 +35,13 @@ function placeRoom(room, map) {
 
     let pos = room.getPosition();
 
-    let newMap = map.map(row => row.slice());
+    let newMap = cloneMap(map);
     for (let h = pos.top; h <= pos.bottom; h++) {
         for (let w = pos.left; w <= pos.right; w++) {
-            if (newMap[h][w] !== FieldTypes.Types.rock) {
+            if (newMap[h][w].type !== FieldTypes.Types.rock) {
                 throw new Error('Space already occupied.');
             }
-            newMap[h][w] = FieldTypes.Types.earth;
+            newMap[h][w].type = FieldTypes.Types.earth;
         }
     }
 
@@ -72,7 +76,7 @@ function findNextPosition(width, height, randomWall) {
 
 function buildNextRoom(startingRoom, map) {
     let shuffledWalls = shuffle(['top', 'bottom', 'left', 'right']);
-    let newMap = map.map(row => row.slice());
+    let newMap = cloneMap(map);
     for (let i = 0; i < shuffledWalls.length; i++) {
         let randomWall = startingRoom.getRandomWall(shuffledWalls[i]);
         let nextRoom = createRandomRoom();
@@ -81,7 +85,7 @@ function buildNextRoom(startingRoom, map) {
             nextRoom.setX(newPos.x);
             nextRoom.setY(newPos.y);
             newMap = placeRoom(nextRoom, newMap);
-            newMap[randomWall.y][randomWall.x] = FieldTypes.Types.earth;
+            newMap[randomWall.y][randomWall.x].type = FieldTypes.Types.earth;
         } catch (e) {
             continue;
         }
@@ -93,23 +97,18 @@ function buildNextRoom(startingRoom, map) {
 }
 
 function getFreeFields(map) {
-    let freeFields = [];
-    map.forEach((row, y) => {
-        row.forEach((cell, x) => {
-            if (cell === FieldTypes.Types.earth) freeFields.push({x, y});
-        });
-    });
-    return freeFields;
+    return map.reduce((acc, row) => {
+        return acc.concat(row.filter(cell => cell.type === FieldTypes.Types.earth));
+    }, []);
 }
 
 function hasOnlyFreeNeighbours(x, y, map) {
     let passed = true;
-    let debugOutput = [];
 
     for (let h = y - 1; h <= y + 1; h++) {
         for (let w = x - 1; w <= x + 1; w++) {
             if (w === x && y === h) continue;
-            passed = passed && (map[h][w] === FieldTypes.Types.earth);
+            passed = passed && (map[h][w].type === FieldTypes.Types.earth);
         }
     }
     return passed;
@@ -119,38 +118,39 @@ function getFreeFieldsWithFreeNeighbors(map) {
     return getFreeFields(map).filter(field => hasOnlyFreeNeighbours(field.x, field.y, map));
 }
 
-function setRandomFreeFieldsToType(map, number, type) {
-    let newMap = map.map(row => row.slice());
-    let freeFields = shuffle(getFreeFieldsWithFreeNeighbors(newMap));
-    let max = (freeFields.length > number) ? number : freeFields.length;
-    for (let i = 0; i < max; i++) {
-        newMap[freeFields[i].y][freeFields[i].x] = type;
-    }
-    return newMap;
+function getRandomFreeFields(map, amount) {
+    let shuffledFields = shuffleImmutable(getFreeFieldsWithFreeNeighbors(map));
+    return shuffledFields.slice(0, amount);
 }
 
 function spawnPlayer(map) {
-    return setRandomFreeFieldsToType(map, 1, FieldTypes.Types.player);
+    let freeFields = getRandomFreeFields(map, 1)[0].type = FieldTypes.Types.player;
+    return map;
 }
 
 function spawnBoss(map) {
-    return setRandomFreeFieldsToType(map, 1, FieldTypes.Types.boss);
+    getRandomFreeFields(map, 1)[0].type = FieldTypes.Types.boss;
+    return map;
 }
 
 function spawnExit(map) {
-    return setRandomFreeFieldsToType(map, 1, FieldTypes.Types.exit);
+    getRandomFreeFields(map, 1)[0].type = FieldTypes.Types.exit;
+    return map;
 }
 
 function spawnWeapon(map) {
-    return setRandomFreeFieldsToType(map, 1, FieldTypes.Types.weapon);
+    getRandomFreeFields(map, 1)[0].type = FieldTypes.Types.weapon;
+    return map;
 }
 
 function spawnHealth(map, number) {
-    return setRandomFreeFieldsToType(map, number, FieldTypes.Types.health);
+    getRandomFreeFields(map, number).forEach(field => field.type = FieldTypes.Types.health);
+    return map;
 }
 
 function spawnEnemies(map, number) {
-    return setRandomFreeFieldsToType(map, number, FieldTypes.Types.enemy);
+    getRandomFreeFields(map, number).forEach(field => field.type = FieldTypes.Types.enemy);
+    return map;
 }
 
 function DungeonGenerator(width = 81, height = 51, level = 1) {

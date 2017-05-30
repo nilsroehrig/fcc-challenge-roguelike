@@ -1,6 +1,6 @@
 // https://bost.ocks.org/mike/shuffle/
 export function shuffle(array) {
-  var m = array.length, t, i;
+  let m = array.length, t, i;
   while (m) {
     i = Math.floor(Math.random() * m--);
     t = array[m];
@@ -8,6 +8,11 @@ export function shuffle(array) {
     array[i] = t;
   }
   return array;
+}
+
+export function shuffleImmutable(array) {
+    let newArray = array.slice();
+    return shuffle(newArray);
 }
 
 export default { shuffle };
