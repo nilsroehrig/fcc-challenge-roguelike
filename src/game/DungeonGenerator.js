@@ -124,7 +124,8 @@ function getRandomFreeFields(map, amount) {
 }
 
 function spawnPlayer(map) {
-    let freeFields = getRandomFreeFields(map, 1)[0].type = FieldTypes.Types.player;
+    let ff = getRandomFreeFields(map, 1)[0];
+    ff.type = FieldTypes.Types.player;
     return map;
 }
 

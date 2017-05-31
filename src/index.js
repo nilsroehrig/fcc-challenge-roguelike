@@ -9,4 +9,9 @@ import {createInitialState, getReducer} from './game/StateManager';
 const initialState = createInitialState();
 const store = createStore(getReducer(initialState));
 
-ReactDOM.render(<App appState={store.getState()} />, document.getElementById('root'));
+const render = function () {
+    ReactDOM.render(<App store={store} appState={store.getState()} />, document.getElementById('root'));
+};
+
+store.subscribe(render);
+render();

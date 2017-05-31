@@ -16,7 +16,7 @@ export function createInitialState() {
     let weapon = getWeapon(0);
 
     return {
-        dungeon: DungeonGenerator(),
+        dungeon: dungeon,
         player: {
             health: 100,
             attack: 7,
@@ -26,6 +26,10 @@ export function createInitialState() {
             exp: 0
         }
     };
+}
+
+function copyMap(map) {
+    return map.map(row => row.map(field => Object.assign({}, field)));
 }
 
 function removeFromMap(field, map) {
@@ -70,31 +74,41 @@ function fight(state, fieldWithEnemy) {
     return Object.assign({}, state, player, {dungeon: Object.assign({}, state.dungeon, {map: newMap})});
 }
 
+function moveToField(field, state) {
+    let pX = state.player.position.x;
+    let pY = state.player.position.y;
+    let fX = field.x;
+    let fY = field.y;
+
+    let mapCopy = copyMap(state.dungeon.map);
+
+    mapCopy[pY][pX] = Object.assign({}, mapCopy[pY][pX], {type: FieldTypes.Types.earth});
+    mapCopy[fY][fX] = Object.assign({}, mapCopy[fY][fX], {type: FieldTypes.Types.player});
+
+    return Object.assign({}, state, {
+        player: Object.assign({}, state.player, {position: {x: fX, y: fY}}),
+        dungeon: Object.assign({}, state.dungeon, {map: mapCopy})
+    });
+}
+
 function takeAction(position, state) {
-    let field = state.map[position.y][position.x];
-    let newState;
+    let field = state.dungeon.map[position.y][position.x];
 
     switch(field.type) {
-        case FieldTypes.rock:
-            newState = state;
-            break;
+        case FieldTypes.Types.rock:
+            return state;
+        case FieldTypes.Types.earth:
+            return moveToField(field, state);
 
-        case FieldTypes.earth:
-            newState = Object.assign(state, {playerPosition:{x: field.x, y: field.y}});
-            break;
-
-        case FieldTypes.enemy:
-            newState = fight(state, field);
-            break;
+        case FieldTypes.Types.enemy:
+            return fight(field, state);
     }
-
-    return newState;
 }
 
 function moveUp(state) {
     let newField = {
-        x: state.playerPosition.x,
-        y: state.playerPosition.y - 1
+        x: state.player.position.x,
+        y: state.player.position.y - 1
     };
 
     return takeAction(newField, state);
@@ -102,8 +116,8 @@ function moveUp(state) {
 
 function moveRight(state) {
     let newField = {
-        x: state.playerPosition.x + 1,
-        y: state.playerPosition.y
+        x: state.player.position.x + 1,
+        y: state.player.position.y
     };
 
     return takeAction(newField, state);
@@ -111,8 +125,8 @@ function moveRight(state) {
 
 function moveDown(state) {
     let newField = {
-        x: state.playerPosition.x,
-        y: state.playerPosition.y + 1
+        x: state.player.position.x,
+        y: state.player.position.y + 1
     };
 
     return takeAction(newField, state);
@@ -120,8 +134,8 @@ function moveDown(state) {
 
 function moveLeft(state) {
     let newField = {
-        x: state.playerPosition.x - 1,
-        y: state.playerPosition.y
+        x: state.player.position.x - 1,
+        y: state.player.position.y
     };
 
     return takeAction(newField, state);
@@ -133,24 +147,19 @@ export function getReducer(initialState) {
             return initialState;
         }
 
-        let newState = state;
-
-        switch(action) {
+        switch(action.type) {
             case 'MOVE_LEFT':
-            newState = moveLeft(state);
-            break;
+                return moveLeft(state);
             case 'MOVE_RIGHT':
-            newState = moveRight(state);
-            break;
+                return moveRight(state);
             case 'MOVE_UP':
-            newState = moveUp(state);
-            break;
+                return moveUp(state);
             case 'MOVE_DOWN':
-            newState = moveDown(state);
-            break;
+                return moveDown(state);
+            default:
+                return state;
         }
 
-        return newState;
     };
 }
 
