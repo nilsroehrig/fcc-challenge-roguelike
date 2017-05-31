@@ -6,7 +6,7 @@ import {createStore, connect, Provider} from 'redux';
 import {createInitialState, getReducer} from './game/StateManager';
 
 
-const initialState = createInitialState;
-const store = createStore(getReducer(initialState), initialState);
+const initialState = createInitialState();
+const store = createStore(getReducer(initialState));
 
-// ReactDOM.render(<App game={initialState} />, document.getElementById('root'));
+ReactDOM.render(<App appState={store.getState()} />, document.getElementById('root'));
