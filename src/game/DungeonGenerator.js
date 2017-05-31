@@ -4,7 +4,7 @@ import { createRandomRoom } from './RoomGenerator';
 import { randomIntBetween } from '../utils/MathUtils';
 
 function cloneMap(map) {
-    return map.map(row => row.map(field => field));
+    return map.map(row => row.map(field => Object.assign({}, field)));
 }
 
 function initMap(width, height) {
