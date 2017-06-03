@@ -5,6 +5,7 @@ import PropTypes from 'prop-types';
 import './App.css';
 import Board from './components/board/Board';
 import GameOver from './components/gameover/GameOver';
+import StatsList from './components/statslist/StatsList';
 
 export default class App extends Component {
     constructor() {
@@ -13,11 +14,11 @@ export default class App extends Component {
     }
 
     componentDidMount() {
-        document.addEventListener('keypress', this.handleKeyPress);
+        document.addEventListener('keydown', this.handleKeyPress);
     }
 
     componentWillUnmount() {
-        document.removeEventListener('keypress', this.handleKeyPress);
+        document.removeEventListener('keydown', this.handleKeyPress);
     }
 
     dispatchAction(action) {
@@ -28,26 +29,28 @@ export default class App extends Component {
     }
 
     handleKeyPress(event) {
-        switch (event.keyCode) {
-            case 37:
-                event.preventDefault();
-                this.dispatchAction({ type: 'MOVE_LEFT' });
-                break;
-            case 38:
-                event.preventDefault();
-                this.dispatchAction({ type: 'MOVE_UP' });
-                break;
-            case 39:
-                event.preventDefault();
-                this.dispatchAction({ type: 'MOVE_RIGHT' });
-                break;
-            case 40:
-                event.preventDefault();
-                this.dispatchAction({ type: 'MOVE_DOWN' });
-                break;
-            default:
-                break;
-        }
+        window.requestAnimationFrame(() => {
+            switch (event.keyCode) {
+                case 37:
+                    event.preventDefault();
+                    this.dispatchAction({ type: 'MOVE_LEFT' });
+                    break;
+                case 38:
+                    event.preventDefault();
+                    this.dispatchAction({ type: 'MOVE_UP' });
+                    break;
+                case 39:
+                    event.preventDefault();
+                    this.dispatchAction({ type: 'MOVE_RIGHT' });
+                    break;
+                case 40:
+                    event.preventDefault();
+                    this.dispatchAction({ type: 'MOVE_DOWN' });
+                    break;
+                default:
+                    break;
+            }
+        });
     }
 
     render() {
@@ -55,25 +58,20 @@ export default class App extends Component {
         const dungeon = this.props.appState.dungeon;
         return (
             <div className="App">
-                <h1>dzc roguelike</h1>
-                <ul>
-                    <li>Health: <strong>{player.health}</strong></li>
-                    <li>
-                        Attack: <strong>{player.attack + player.weapon.attack}</strong><br />
-                        <small>(base: {player.attack}; weapon:{player.weapon.attack})</small>
-                    </li>
-                    <li>Weapon: {player.weapon.name}</li>
-                    <li>Experience: <strong>{player.exp}</strong></li>
-                    <li>Level: <strong>{player.level}</strong></li>
-                </ul>
-                <Board dungeon={dungeon} />
+                <header className="App__header">
+                    <h1 className="App__headline">DZC Roguelike</h1>
+                    <StatsList {...player} dungeonLevel={dungeon.level}/>
+                </header>
+                <div className="App__board-container">
+                    <Board {...dungeon} />
+                </div>
                 <GameOver
                     isHidden={!this.props.appState.gameOver}
                     isWon={this.props.appState.winner}
                     store={this.props.store}
                 />
-                <footer>
-                    <p>Hero image <a href="http://www.freepik.com">Designed by Freepik</a></p>
+                <footer className="App__footer">
+                    <p>Hero, Sword, Potion, Stairs icons are <a href="http://www.freepik.com">designed by Freepik</a></p>
                 </footer>
             </div>
         );

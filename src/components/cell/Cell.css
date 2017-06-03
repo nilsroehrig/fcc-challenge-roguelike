@@ -1,71 +1,79 @@
 .Cell {
+    position: relative;
     box-sizing: border-box;
-    width: 30px;
-    height: 30px;
+    width: 20px;
+    height: 20px;
     background-size: contain;
-}
-
-.Cell--rock {
-    background-color: #666;
-    background-image: url("../../resources/img/textures/blackbrick.jpg");
-}
-
-.Cell--earth {
-    background-color: #fff;
     background-image: url("../../resources/img/textures/gravel.jpg");
 }
 
-.Cell--enemy,
-.Cell--boss,
-.Cell--health,
-.Cell--weapon,
-.Cell--exit {
-    border-radius: 50%;
-}
-
-.Cell--enemy,
-.Cell--boss {
-    background-color: #c00;
-}
-
-.Cell--boss {
-    position: relative;
-    box-shadow: 0 0 20px rgba(200, 0, 0, 0.75);
-}
-
-.Cell--player {
-    position: relative;
-    background-image: url("../../resources/img/textures/gravel.jpg");
-}
-
-.Cell--player::before {
+.Cell::before {
     position: absolute;
+    z-index: 1;
     left: 50%;
     top: 50%;
     width: 1px;
     height: 1px;
     border-radius: 50%;
-    box-shadow: 0 0 40px 25px rgba(255, 255, 255, 0.75);
     content: '';
 }
 
-.Cell--player::after {
-    position: absolute;
-    width: 100%;
-    height: 100%;
+.Cell--rock {
+    position: relative;
+    z-index: 3;
+    background-color: #666;
+    background-image: url("../../resources/img/textures/blackbrick.jpg");
+}
+
+.Cell__content {
     left: 0;
     top: 0;
-    background: transparent url("../../resources/img/hero.svg") center center no-repeat;
+    width: 100%;
+    height: 100%;
+    background: transparent none center center no-repeat;
     background-size: contain;
-    content: '';
+    position: absolute;
+    z-index: 2;
 }
 
-.Cell--health {
-    background-color: #0c0;
+.Cell--player .Cell__content {
+    background-image: url("../../resources/img/hero.svg");
 }
 
-.Cell--weapon {
-    background-color: gold;
+.Cell--player::before {
+    box-shadow: 0 0 20px 20px rgba(255, 255, 255, 0.5);
+}
+
+.Cell--health .Cell__content {
+    background-image: url("../../resources/img/potion.svg");
+}
+
+.Cell--health::before {
+    box-shadow: 0 0 20px 20px rgba(50, 205, 50, 0.5);
+}
+
+.Cell--weapon .Cell__content {
+    background-image: url("../../resources/img/sword.svg");
+}
+
+.Cell--weapon::before {
+    box-shadow: 0 0 20px 20px rgba(238, 232, 170, 0.5);
+}
+
+.Cell--enemy::before {
+    box-shadow: 0 0 20px 20px rgba(240, 128, 128, 0.5);
+}
+
+.Cell--boss::before {
+    box-shadow: 0 0 20px 20px rgba(255, 0, 0, 0.75);
+}
+
+.Cell--exit .Cell__content {
+    background-image: url("../../resources/img/stairs.svg");
+}
+
+.Cell--exit::before {
+    box-shadow: 0 0 20px 20px rgba(238, 130, 238, 0.75);
 }
 
 .Cell--exit {

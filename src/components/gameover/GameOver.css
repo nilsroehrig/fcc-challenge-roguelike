@@ -1,5 +1,6 @@
 .GameOver {
     position: fixed;
+    z-index: 10;
     top: 0;
     left: 0;
     width: 100vw;
@@ -16,6 +17,7 @@
 
 .GameOver__message {
     background-color: #fff;
+    color: #333;
     width: 25%;
     text-align: center;
 }

@@ -1,0 +1,21 @@
+.App {
+    width: 60%;
+    margin: 0 auto;
+}
+
+.App__headline {
+    text-align: center;
+    text-shadow: 1px 1px 0 #000;
+}
+
+.App__board-container {
+    margin-top: -1px;
+    background: transparent url("./resources/img/textures/blackbrick.jpg") repeat left top;
+    background-size: 20px 20px;
+    border: solid thin #eee;
+    overflow: hidden;
+}
+
+.App__footer {
+    font-size: 0.75rem;
+}

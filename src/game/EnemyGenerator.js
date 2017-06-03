@@ -1,5 +1,5 @@
 import uuid from 'uuid';
-import { randomIntBetween } from '../utils/MathUtils';
+import { randomBetween, randomIntBetween } from '../utils/MathUtils';
 import getRandomMonsterName from './MonsterNames';
 
 function generateAttribute(min, max, count) {
@@ -23,10 +23,12 @@ function generate(x, y, level, boss) {
         health,
         attack,
         boss,
+        critChance: Math.floor(level * modifier),
         id: uuid(),
         name: monsterName.join(' '),
-        exp: ((health + attack) / level) * 2,
-        position: { x, y }
+        exp: Math.floor(((health + attack) / level) * randomBetween(1, 2)),
+        position: { x, y },
+        img: `https://robohash.org/${encodeURIComponent(monsterName.join(' '))}.png?set=set2`
     };
 }
 

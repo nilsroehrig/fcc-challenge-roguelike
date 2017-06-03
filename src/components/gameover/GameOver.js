@@ -5,7 +5,6 @@ import PropTypes from 'prop-types';
 import './GameOver.css';
 
 export default function GameOver(props) {
-    console.log(props);
     const classNames = ['GameOver'];
     if (props.isHidden) {
         classNames.push('GameOver--hidden');

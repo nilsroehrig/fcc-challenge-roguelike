@@ -23,8 +23,8 @@ function createNewLevel(level = undefined) {
     const { x, y } = flatMap.filter(item => item.type === FieldTypes.Types.player)[0];
     const enemies = createEnemies(flatMap, level || 1);
     enemies.forEach((enemy) => {
-        const { name, position } = enemy;
-        dungeon.map[position.y][position.x].img = `https://api.adorable.io/avatars/80/${encodeURIComponent(name)}`;
+        const { position } = enemy;
+        dungeon.map[position.y][position.x].img = enemy.img;
     });
 
     return { dungeon, enemies, position: { x, y } };
@@ -132,15 +132,19 @@ function fight(field, state) {
     const enemy = Object.assign({}, getEnemy(field, state));
     const attackPower = player.attack + player.weapon.attack;
 
-    player.health -= enemy.attack;
-    enemy.health -= attackPower + calculateCritical(attackPower, player.weapon.critChance);
+    player.health -= Math.floor(
+        enemy.attack + calculateCritical(enemy.attack, enemy.critChance)
+    );
+    enemy.health -= Math.floor(
+        attackPower + calculateCritical(attackPower, player.weapon.critChance)
+    );
 
-    if (player.health < 0) {
+    if (player.health <= 0) {
         return gameOver(state);
     }
 
-    if (enemy.health < 0) {
-        player.exp += enemy.exp;
+    if (enemy.health <= 0) {
+        player.exp = Math.floor(player.exp + enemy.exp);
         if (player.exp > (player.level * 1000)) {
             player = levelUp(player);
         }
