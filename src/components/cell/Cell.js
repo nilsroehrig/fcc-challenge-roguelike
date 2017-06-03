@@ -4,8 +4,12 @@ import FieldTypes from '../../game/FieldTypes';
 import './Cell.css';
 
 export default function Cell(props) {
+    const style = (props.img) ? {
+        backgroundImage: `url(${props.img})`,
+        borderRadius: 0
+    } : null;
     return (
-        <div className={`Cell Cell--${FieldTypes.TypesByCode[props.type]}`} />
+        <div className={`Cell Cell--${FieldTypes.TypesByCode[props.type]}`} style={style} />
     );
 }
 

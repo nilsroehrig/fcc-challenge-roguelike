@@ -68,6 +68,9 @@ export default class App extends Component {
                 </ul>
                 <Board dungeon={dungeon} />
                 <GameOver isHidden={!this.props.appState.gameOver} store={this.props.store} />
+                <footer>
+                    <p>Hero image <a href="http://www.freepik.com">Designed by Freepik</a></p>
+                </footer>
             </div>
         );
     }

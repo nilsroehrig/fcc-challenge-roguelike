@@ -1,20 +1,22 @@
 .Cell {
     box-sizing: border-box;
-    width: 28px;
-    height: 28px;
+    width: 40px;
+    height: 40px;
+    background-size: contain;
 }
 
 .Cell--rock {
-    background: #666 url("../../resources/img/textures/blackbrick.jpg");
+    background-color: #666;
+    background-image: url("../../resources/img/textures/blackbrick.jpg");
 }
 
 .Cell--earth {
-    background: #fff url("../../resources/img/textures/gravel.jpg");
+    background-color: #fff;
+    background-image: url("../../resources/img/textures/gravel.jpg");
 }
 
 .Cell--enemy,
 .Cell--boss,
-.Cell--player,
 .Cell--health,
 .Cell--weapon,
 .Cell--exit {
@@ -44,7 +46,9 @@
 }
 
 .Cell--player {
-    background-color: #00c;
+    background-image:
+        url("../../resources/img/hero.svg"),
+        url("../../resources/img/textures/gravel.jpg");
 }
 
 .Cell--health {

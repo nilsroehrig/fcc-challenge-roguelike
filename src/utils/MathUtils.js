@@ -3,7 +3,7 @@ export function randomBetween(start, end) {
 }
 
 export function randomIntBetween(start, end) {
-    return randomBetween(Math.floor(start), Math.floor(end));
+    return Math.floor(randomBetween(Math.floor(start), Math.floor(end)));
 }
 
 export default {randomBetween, randomIntBetween};

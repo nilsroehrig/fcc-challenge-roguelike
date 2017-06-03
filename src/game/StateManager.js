@@ -20,11 +20,17 @@ export function createInitialState() {
     }, []);
 
     const { x, y } = flatMap.filter(item => item.type === FieldTypes.Types.player)[0];
+    const enemies = createEnemies(flatMap, 1);
+
+    enemies.forEach((enemy) => {
+        const { name, position } = enemy;
+        dungeon.map[position.y][position.x].img = `https://api.adorable.io/avatars/80/${encodeURIComponent(name)}`;
+    });
 
     return {
         dungeon,
+        enemies,
         gameOver: false,
-        enemies: createEnemies(flatMap, 1),
         player: {
             health: 100,
             attack: 10,
@@ -42,13 +48,12 @@ function copyMap(map) {
 
 function removeFromMap(field, map) {
     return map.slice().map((row) => {
-        const idx = row.indexOf(field);
+        const idx = row.findIndex(f => f.x === field.x && f.y === field.y);
         if (idx === -1) {
             return row;
         }
-
         const newRow = row.slice();
-        newRow[idx] = Object.assign({}, newRow[idx], { type: FieldTypes.Types.earth });
+        newRow[idx] = Object.assign({}, newRow[idx], { type: FieldTypes.Types.earth, img: null });
         return newRow;
     });
 }
