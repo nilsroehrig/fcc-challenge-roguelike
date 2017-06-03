@@ -2,31 +2,31 @@ import { randomBetween } from '../utils/MathUtils';
 import Room from './Room';
 
 function createSmallRoom(x, y) {
-    let width = Math.floor(randomBetween(5,11));
-    let height = Math.floor(randomBetween(5,11));
+    const width = Math.floor(randomBetween(3, 7));
+    const height = Math.floor(randomBetween(3, 7));
     return new Room(width, height, x, y);
 }
 
 function createMediumRoom(x, y) {
-    let width = Math.floor(randomBetween(9, 15));
-    let height = Math.floor(randomBetween(9, 15));
+    const width = Math.floor(randomBetween(7, 9));
+    const height = Math.floor(randomBetween(7, 9));
     return new Room(width, height, x, y);
 }
 
 function createLargeRoom(x, y) {
-    let width = Math.floor(randomBetween(13, 19));
-    let height = Math.floor(randomBetween(13, 19));
+    const width = Math.floor(randomBetween(9, 13));
+    const height = Math.floor(randomBetween(9, 13));
     return new Room(width, height, x, y);
 }
 
 export function createRandomRoom(x, y) {
-    let possibilities = {
+    const possibilities = {
         0: createSmallRoom,
         1: createMediumRoom,
         2: createLargeRoom
     };
-    let sel = Math.floor(randomBetween(0, 3));
-    let room = possibilities[sel](x, y);
+    const sel = Math.floor(randomBetween(0, 3));
+    const room = possibilities[sel](x, y);
     room.setWidth(room.width % 2 === 0 ? room.width + 1 : room.width);
     room.setHeight(room.height % 2 === 0 ? room.height + 1 : room.height);
     return room;

@@ -1,28 +1,35 @@
-import {getWeapon} from './Weapons.js';
+import { getWeapon } from './Weapons';
 import FieldTypes from './FieldTypes';
 import DungeonGenerator from './DungeonGenerator';
 import EnemyGenerator from './EnemyGenerator';
-import {randomIntBetween} from '../utils/MathUtils';
+import { randomIntBetween } from '../utils/MathUtils';
+
+function createEnemies(flatMap, level) {
+    const enemyFields = flatMap.filter(field => field.type === FieldTypes.Types.enemy);
+    return enemyFields.map((enemyField) => {
+        const { x, y } = enemyField;
+        return EnemyGenerator.generate(x, y, level);
+    });
+}
 
 export function createInitialState() {
-    let dungeon = DungeonGenerator();
-    let flatMap = dungeon.map.reduce((acc, row) => {
-        acc.push.apply(acc, row);
+    const dungeon = DungeonGenerator.generate();
+    const flatMap = dungeon.map.reduce((acc, row) => {
+        acc.push(...row);
         return acc;
     }, []);
 
-    let {x, y} = flatMap.filter(item => item.type === FieldTypes.Types.player)[0];
-
-    let weapon = getWeapon(0);
+    const { x, y } = flatMap.filter(item => item.type === FieldTypes.Types.player)[0];
 
     return {
-        dungeon: dungeon,
+        dungeon,
+        enemies: createEnemies(flatMap, 1),
         player: {
             health: 100,
             attack: 7,
             weapon: getWeapon(0),
             level: 1,
-            position: {x, y},
+            position: { x, y },
             exp: 0
         }
     };
@@ -33,27 +40,31 @@ function copyMap(map) {
 }
 
 function removeFromMap(field, map) {
-    return map.slice().map(row => {
-        let idx = row.indexOf(field);
+    return map.slice().map((row) => {
+        const idx = row.indexOf(field);
         if (idx === -1) {
             return row;
         }
 
-        let newRow = row.slice();
-        newRow[idx] = Object.assign({}, newRow[idx], {type: FieldTypes.Types.earth});
+        const newRow = row.slice();
+        newRow[idx] = Object.assign({}, newRow[idx], { type: FieldTypes.Types.earth });
+        return newRow;
     });
 }
 
 function levelUp(player) {
-    let newPlayer = Object.assign({}, player);
+    const newPlayer = Object.assign({}, player);
     newPlayer.level += 1;
     newPlayer.attack += randomIntBetween(8, 12) * newPlayer.level;
     return newPlayer;
 }
 
-function fight(state, fieldWithEnemy) {
+function fight(fieldWithEnemy, state) {
     let player = Object.assign({}, state.player);
-    let enemy = Object.assign({}, (fieldWithEnemy.enemy) ? fieldWithEnemy.enemy: EnemyGenerator(state.dungeonLevel));
+    let enemy = Object.assign({}, (fieldWithEnemy.enemy)
+        ? fieldWithEnemy.enemy
+        : EnemyGenerator(state.dungeonLevel)
+    );
     let newMap = state.dungeon.map;
 
     player.health -= enemy.attack;
@@ -65,13 +76,16 @@ function fight(state, fieldWithEnemy) {
         player.position.y = fieldWithEnemy.y;
         newMap = removeFromMap(fieldWithEnemy, state.dungeon.map);
         enemy = null;
+    } else {
+        newMap[fieldWithEnemy.y][fieldWithEnemy.x] = enemy;
     }
 
     if (player.exp > (player.level * 1000)) {
         player = levelUp(player);
     }
-
-    return Object.assign({}, state, player, {dungeon: Object.assign({}, state.dungeon, {map: newMap})});
+    return Object.assign({}, state, player, {
+        dungeon: Object.assign({}, state.dungeon, { map: newMap })
+    });
 }
 
 function moveToField(field, state) {

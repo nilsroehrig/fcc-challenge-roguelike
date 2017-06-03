@@ -1,15 +1,15 @@
 .Cell {
     box-sizing: border-box;
-    width: 14px;
-    height: 14px;
+    width: 28px;
+    height: 28px;
 }
 
 .Cell--rock {
-    background-color: #666;
+    background: #666 url("../../resources/img/textures/blackbrick.jpg");
 }
 
 .Cell--earth {
-    background-color: #fff;
+    background: #fff url("../../resources/img/textures/gravel.jpg");
 }
 
 .Cell--enemy,

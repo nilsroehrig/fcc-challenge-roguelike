@@ -1,4 +1,4 @@
-import {randomIntBetween} from '../utils/MathUtils';
+import { randomIntBetween } from '../utils/MathUtils';
 import getRandomMonsterName from './MonsterNames';
 
 function generateAttribute(min, max, count) {
@@ -9,13 +9,16 @@ function generateAttribute(min, max, count) {
     return health;
 }
 
-export default function EnemyGenerator(level) {
-    let health = generateAttribute(80, 120, level);
-    let attack = generateAttribute(8, 12, level);
+function generate(x, y, level) {
+    const health = generateAttribute(80, 120, level);
+    const attack = generateAttribute(8, 12, level);
     return {
+        health,
+        attack,
         name: getRandomMonsterName(),
-        health: health,
-        attack: attack,
-        exp: (health + attack) / level
+        exp: (health + attack) / level,
+        position: { x, y }
     };
 }
+
+export default { generate };
