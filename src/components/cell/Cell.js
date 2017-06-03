@@ -5,18 +5,22 @@ import './Cell.css';
 
 export default function Cell(props) {
     const style = (props.img) ? {
-        backgroundImage: `url(${props.img})`,
+        backgroundImage: `url("${props.img}")`,
         borderRadius: 0
     } : null;
+    const type = FieldTypes.TypesByCode[props.type];
+
     return (
-        <div className={`Cell Cell--${FieldTypes.TypesByCode[props.type]}`} style={style} />
+        <div className={`Cell Cell--${type}`} style={style} />
     );
 }
 
 Cell.propTypes = {
-    type: PropTypes.string
+    type: PropTypes.number,
+    img: PropTypes.string
 };
 
 Cell.defaultProps = {
-    type: FieldTypes.Types.earth
+    type: FieldTypes.Types.earth,
+    img: null
 };

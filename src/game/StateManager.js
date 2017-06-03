@@ -5,38 +5,44 @@ import EnemyGenerator from './EnemyGenerator';
 import { randomIntBetween } from '../utils/MathUtils';
 
 function createEnemies(flatMap, level) {
-    const enemyFields = flatMap.filter(field => field.type === FieldTypes.Types.enemy);
+    const enemyFields = flatMap.filter(field =>
+        field.type === FieldTypes.Types.enemy || field.type === FieldTypes.Types.boss);
     return enemyFields.map((enemyField) => {
         const { x, y } = enemyField;
-        return EnemyGenerator.generate(x, y, level);
+        return EnemyGenerator.generate(x, y, level, enemyField.type === FieldTypes.Types.boss);
     });
 }
 
-export function createInitialState() {
-    const dungeon = DungeonGenerator.generate();
+function createNewLevel(level = undefined) {
+    const dungeon = DungeonGenerator.generate(level);
     const flatMap = dungeon.map.reduce((acc, row) => {
         acc.push(...row);
         return acc;
     }, []);
 
     const { x, y } = flatMap.filter(item => item.type === FieldTypes.Types.player)[0];
-    const enemies = createEnemies(flatMap, 1);
-
+    const enemies = createEnemies(flatMap, level || 1);
     enemies.forEach((enemy) => {
         const { name, position } = enemy;
         dungeon.map[position.y][position.x].img = `https://api.adorable.io/avatars/80/${encodeURIComponent(name)}`;
     });
 
+    return { dungeon, enemies, position: { x, y } };
+}
+
+export function createInitialState() {
+    const level = createNewLevel();
     return {
-        dungeon,
-        enemies,
+        dungeon: level.dungeon,
+        enemies: level.enemies,
         gameOver: false,
+        winner: false,
         player: {
             health: 100,
             attack: 10,
             weapon: getWeapon(0),
             level: 1,
-            position: { x, y },
+            position: level.position,
             exp: 0
         }
     };
@@ -139,6 +145,10 @@ function fight(field, state) {
             player = levelUp(player);
         }
         newState = moveToField(field, killEnemy(field, Object.assign({}, state, { player })));
+        if (enemy.boss) {
+            newState.winner = true;
+            return gameOver(newState);
+        }
     } else {
         newState = updateEnemy(enemy, Object.assign({}, state, { player }));
     }
@@ -163,6 +173,16 @@ function pickUpWeapon(field, state) {
     return moveToField(field, Object.assign({}, state, { player, dungeon }));
 }
 
+function enterNextLevel(state) {
+    const { dungeon, enemies, position } = createNewLevel(state.dungeon.level + 1);
+    const player = Object.assign({}, state.player, { position });
+    return Object.assign({}, state, {
+        dungeon,
+        enemies,
+        player
+    });
+}
+
 function takeAction(position, state) {
     const field = Object.assign({}, state.dungeon.map[position.y][position.x]);
     const types = FieldTypes.Types;
@@ -172,6 +192,7 @@ function takeAction(position, state) {
             return state;
 
         case types.enemy:
+        case types.boss:
             return fight(field, state);
 
         case types.health:
@@ -179,6 +200,9 @@ function takeAction(position, state) {
 
         case types.weapon:
             return pickUpWeapon(field, state);
+
+        case types.exit:
+            return enterNextLevel(state);
 
         default:
             return moveToField(field, state);
@@ -242,7 +266,7 @@ export function getReducer(initialState) {
                 return moveDown(state);
 
             case 'RESTART':
-                return createInitialState()
+                return createInitialState();
 
             default:
                 return state;

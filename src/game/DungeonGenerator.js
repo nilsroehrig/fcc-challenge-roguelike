@@ -167,7 +167,7 @@ function spawnEnemies(map, number) {
     return newMap;
 }
 
-function generate(width = 51, height = 31, level = 1) {
+function generate(level = 1, width = 51, height = 35) {
     if (width < 14 || height < 14) {
         throw new Error('Width and height of the dungeon must at least be 14');
     }
@@ -185,8 +185,9 @@ function generate(width = 51, height = 31, level = 1) {
     map = spawnPlayer(map);
     if (level === 5) {
         map = spawnBoss(map);
+    } else {
+        map = spawnExit(map);
     }
-    map = spawnExit(map);
     map = spawnWeapon(map);
     map = spawnHealth(map, randomIntBetween(5, 10));
     map = spawnEnemies(map, randomIntBetween(5, 10));
