@@ -1,4 +1,4 @@
-import { getWeapon } from './Weapons';
+import getWeapon from './Weapons';
 import FieldTypes from './FieldTypes';
 import DungeonGenerator from './DungeonGenerator';
 import EnemyGenerator from './EnemyGenerator';
@@ -52,6 +52,20 @@ function removeFromMap(field, map) {
     });
 }
 
+function killEnemy(field, state) {
+    const filteredEnemies = state.enemies.filter((enemy) => {
+        const { x, y } = enemy.position;
+        return (field.x !== x || field.y !== y);
+    });
+    const newMap = removeFromMap(field, state.dungeon.map);
+    return Object.assign({}, state, {
+        enemies: filteredEnemies,
+        dungeon: Object.assign({}, state.dungeon, {
+            map: newMap
+        })
+    });
+}
+
 function levelUp(player) {
     const newPlayer = Object.assign({}, player);
     newPlayer.level += 1;
@@ -59,117 +73,160 @@ function levelUp(player) {
     return newPlayer;
 }
 
-function fight(fieldWithEnemy, state) {
-    let player = Object.assign({}, state.player);
-    let enemy = Object.assign({}, (fieldWithEnemy.enemy)
-        ? fieldWithEnemy.enemy
-        : EnemyGenerator(state.dungeonLevel)
-    );
-    let newMap = state.dungeon.map;
+function getEnemy(field, state) {
+    const { x, y } = field;
+    return state.enemies.filter(enemy =>
+        enemy.position.x === x && enemy.position.y === y
+    )[0];
+}
 
-    player.health -= enemy.attack;
-    enemy.health -= player.attack + player.weapon.attack;
-
-    if (enemy.health < 0) {
-        player.exp += enemy.exp;
-        player.position.x = fieldWithEnemy.x;
-        player.position.y = fieldWithEnemy.y;
-        newMap = removeFromMap(fieldWithEnemy, state.dungeon.map);
-        enemy = null;
-    } else {
-        newMap[fieldWithEnemy.y][fieldWithEnemy.x] = enemy;
-    }
-
-    if (player.exp > (player.level * 1000)) {
-        player = levelUp(player);
-    }
-    return Object.assign({}, state, player, {
-        dungeon: Object.assign({}, state.dungeon, { map: newMap })
-    });
+function updateEnemy(newEnemy, state) {
+    const enemies = state.enemies.slice();
+    const idx = enemies.findIndex(enemy => enemy.id === newEnemy.id);
+    enemies[idx] = newEnemy;
+    return Object.assign({}, state, { enemies });
 }
 
 function moveToField(field, state) {
-    let pX = state.player.position.x;
-    let pY = state.player.position.y;
-    let fX = field.x;
-    let fY = field.y;
+    const pX = state.player.position.x;
+    const pY = state.player.position.y;
+    const fX = field.x;
+    const fY = field.y;
 
-    let mapCopy = copyMap(state.dungeon.map);
+    const mapCopy = copyMap(state.dungeon.map);
 
-    mapCopy[pY][pX] = Object.assign({}, mapCopy[pY][pX], {type: FieldTypes.Types.earth});
-    mapCopy[fY][fX] = Object.assign({}, mapCopy[fY][fX], {type: FieldTypes.Types.player});
+    mapCopy[pY][pX] = Object.assign({}, mapCopy[pY][pX], { type: FieldTypes.Types.earth });
+    mapCopy[fY][fX] = Object.assign({}, mapCopy[fY][fX], { type: FieldTypes.Types.player });
 
     return Object.assign({}, state, {
-        player: Object.assign({}, state.player, {position: {x: fX, y: fY}}),
-        dungeon: Object.assign({}, state.dungeon, {map: mapCopy})
+        player: Object.assign({}, state.player, { position: { x: fX, y: fY } }),
+        dungeon: Object.assign({}, state.dungeon, { map: mapCopy })
     });
 }
 
-function takeAction(position, state) {
-    let field = state.dungeon.map[position.y][position.x];
+function calculateCritical(attack, chance) {
+    return (randomIntBetween(0, 100) < chance)
+        ? attack * 0.5
+        : 0;
+}
 
-    switch(field.type) {
-        case FieldTypes.Types.rock:
+function fight(field, state) {
+    let player = Object.assign({}, state.player);
+    let newState = {};
+    const enemy = Object.assign({}, getEnemy(field, state));
+    const attackPower = player.attack + player.weapon.attack;
+
+    player.health -= enemy.attack;
+    enemy.health -= attackPower + calculateCritical(attackPower, player.weapon.critChance);
+
+    if (enemy.health < 0) {
+        player.exp += enemy.exp;
+        if (player.exp > (player.level * 1000)) {
+            player = levelUp(player);
+        }
+        newState = moveToField(field, killEnemy(field, Object.assign({}, state, { player })));
+    } else {
+        newState = updateEnemy(enemy, Object.assign({}, state, { player }));
+    }
+
+    return Object.assign({}, state, newState);
+}
+
+function pickUpHealth(field, state) {
+    const amount = state.dungeon.level * 30;
+    const player = Object.assign({}, state.player);
+    const map = removeFromMap(field, state.dungeon.map);
+    const dungeon = Object.assign({}, state.dungeon, { map });
+    player.health += amount;
+    return moveToField(field, Object.assign({}, state, { player, dungeon }));
+}
+
+function pickUpWeapon(field, state) {
+    const player = Object.assign({}, state.player);
+    const map = removeFromMap(field, state.dungeon.map);
+    const dungeon = Object.assign({}, state.dungeon, { map });
+    player.weapon = getWeapon(dungeon.level);
+    return moveToField(field, Object.assign({}, state, { player, dungeon }));
+}
+
+function takeAction(position, state) {
+    const field = Object.assign({}, state.dungeon.map[position.y][position.x]);
+    const types = FieldTypes.Types;
+
+    switch (field.type) {
+        case types.rock:
             return state;
-        case FieldTypes.Types.earth:
+
+        case types.enemy:
+            return fight(field, state);
+
+        case types.health:
+            return pickUpHealth(field, state);
+
+        case types.weapon:
+            return pickUpWeapon(field, state);
+
+        default:
             return moveToField(field, state);
 
-        case FieldTypes.Types.enemy:
-            return fight(field, state);
     }
 }
 
 function moveUp(state) {
-    let newField = {
+    const nextField = {
         x: state.player.position.x,
         y: state.player.position.y - 1
     };
 
-    return takeAction(newField, state);
+    return takeAction(nextField, state);
 }
 
 function moveRight(state) {
-    let newField = {
+    const nextField = {
         x: state.player.position.x + 1,
         y: state.player.position.y
     };
 
-    return takeAction(newField, state);
+    return takeAction(nextField, state);
 }
 
 function moveDown(state) {
-    let newField = {
+    const nextField = {
         x: state.player.position.x,
         y: state.player.position.y + 1
     };
 
-    return takeAction(newField, state);
+    return takeAction(nextField, state);
 }
 
 function moveLeft(state) {
-    let newField = {
+    const nextField = {
         x: state.player.position.x - 1,
         y: state.player.position.y
     };
 
-    return takeAction(newField, state);
+    return takeAction(nextField, state);
 }
 
 export function getReducer(initialState) {
-    return function(state, action) {
+    return function reducer(state, action) {
         if (state === undefined) {
             return initialState;
         }
 
-        switch(action.type) {
+        switch (action.type) {
             case 'MOVE_LEFT':
                 return moveLeft(state);
+
             case 'MOVE_RIGHT':
                 return moveRight(state);
+
             case 'MOVE_UP':
                 return moveUp(state);
+
             case 'MOVE_DOWN':
                 return moveDown(state);
+
             default:
                 return state;
         }
@@ -177,4 +234,4 @@ export function getReducer(initialState) {
     };
 }
 
-export default {createInitialState, getReducer};
+export default { createInitialState, getReducer };

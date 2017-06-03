@@ -1,3 +1,4 @@
+import uuid from 'uuid';
 import { randomIntBetween } from '../utils/MathUtils';
 import getRandomMonsterName from './MonsterNames';
 
@@ -15,6 +16,7 @@ function generate(x, y, level) {
     return {
         health,
         attack,
+        id: uuid(),
         name: getRandomMonsterName(),
         exp: (health + attack) / level,
         position: { x, y }

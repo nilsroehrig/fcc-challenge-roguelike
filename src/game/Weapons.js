@@ -1,25 +1,33 @@
 import { randomIntBetween } from '../utils/MathUtils';
-const Weapons = [{
+
+const Weapons = [
+    {
         name: 'Bare Hands',
-        attack: 0
+        attack: 0,
+        critChance: 1
     }, {
         name: 'Wooden Branch',
-        attack: randomIntBetween(4, 7)
+        attack: randomIntBetween(10, 20),
+        critChance: 2
     }, {
         name: 'Rusty Pipe',
-        attack: randomIntBetween(12, 19)
+        attack: randomIntBetween(20, 40),
+        critChance: 3
     }, {
         name: 'Dagger',
-        attack: randomIntBetween(20, 31)
+        attack: randomIntBetween(40, 70),
+        critChance: 5
     }, {
         name: 'War Hammer',
-        attack: randomIntBetween(35, 46)
+        attack: randomIntBetween(70, 100),
+        critChance: 8
     }, {
         name: 'Hand of Gods',
-        attack: randomIntBetween(50, 71)
+        attack: randomIntBetween(100, 140),
+        critChance: 13
     }
 ];
 
-export function getWeapon(index) {
+export default function getWeapon(index) {
     return Weapons[index];
 }
