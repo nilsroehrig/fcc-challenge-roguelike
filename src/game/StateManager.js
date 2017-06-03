@@ -23,10 +23,11 @@ export function createInitialState() {
 
     return {
         dungeon,
+        gameOver: false,
         enemies: createEnemies(flatMap, 1),
         player: {
             health: 100,
-            attack: 7,
+            attack: 10,
             weapon: getWeapon(0),
             level: 1,
             position: { x, y },
@@ -110,6 +111,10 @@ function calculateCritical(attack, chance) {
         : 0;
 }
 
+function gameOver(state) {
+    return Object.assign({}, state, { gameOver: true });
+}
+
 function fight(field, state) {
     let player = Object.assign({}, state.player);
     let newState = {};
@@ -118,6 +123,10 @@ function fight(field, state) {
 
     player.health -= enemy.attack;
     enemy.health -= attackPower + calculateCritical(attackPower, player.weapon.critChance);
+
+    if (player.health < 0) {
+        return gameOver(state);
+    }
 
     if (enemy.health < 0) {
         player.exp += enemy.exp;
@@ -227,10 +236,12 @@ export function getReducer(initialState) {
             case 'MOVE_DOWN':
                 return moveDown(state);
 
+            case 'RESTART':
+                return createInitialState()
+
             default:
                 return state;
         }
-
     };
 }
 

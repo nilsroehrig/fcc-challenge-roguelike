@@ -1,15 +1,16 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
+import { createStore } from 'redux';
+
 import './index.css';
 import App from './App';
-import {createStore, connect, Provider} from 'redux';
-import {createInitialState, getReducer} from './game/StateManager';
+import { createInitialState, getReducer } from './game/StateManager';
 
 
 const initialState = createInitialState();
 const store = createStore(getReducer(initialState));
 
-const render = function () {
+const render = function render() {
     ReactDOM.render(<App store={store} appState={store.getState()} />, document.getElementById('root'));
 };
 

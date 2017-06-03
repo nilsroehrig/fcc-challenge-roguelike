@@ -1,0 +1,21 @@
+.GameOver {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.85);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.GameOver--hidden {
+    display: none;
+}
+
+.GameOver__message {
+    background-color: #fff;
+    width: 25%;
+    text-align: center;
+}
