@@ -2,7 +2,7 @@
 import uuid from 'uuid';
 
 import type { FieldTypeCode } from './FieldTypes';
-import type { Position } from '../../../types/BasicTypes';
+import type { Point } from '../../../types/BasicTypes';
 
 type FieldProperties = {
     x: number,
@@ -24,7 +24,7 @@ export default class Field {
         const { x, y, type, image } = params;
         const id = params.id || uuid.v4();
 
-        function getPosition(): Position {
+        function getPosition(): Point {
             return Object.freeze({ x, y });
         }
 
