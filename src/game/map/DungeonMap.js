@@ -4,7 +4,8 @@ import uuid from 'uuid';
 import Field from './fields/Field';
 import { Types } from './fields/FieldTypes';
 
-type Rect = { width: number, height: number };
+import type { Rect } from '../../types/BasicTypes';
+
 type DungeonMapRow = Array<Field>;
 type DungeonMapData = Array<DungeonMapRow>;
 

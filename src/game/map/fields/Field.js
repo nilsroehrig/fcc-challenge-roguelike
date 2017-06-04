@@ -2,8 +2,8 @@
 import uuid from 'uuid';
 
 import type { FieldTypeCode } from './FieldTypes';
+import type { Position } from '../../../types/BasicTypes';
 
-type Position = { x: number, y: number };
 type FieldProperties = {
     x: number,
     y: number,
