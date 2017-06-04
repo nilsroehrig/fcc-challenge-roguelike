@@ -1,6 +1,7 @@
-import {switchKeysAndValues} from '../../../utils/ObjectUtils';
+// @flow
+import { switchKeysAndValues } from '../../../utils/ObjectUtils';
 
-const Types = Object.freeze({
+export const Types: any = {
     rock: 0,
     earth: 1,
     wall: 2,
@@ -10,8 +11,11 @@ const Types = Object.freeze({
     exit: 6,
     weapon: 7,
     health: 8
-});
+};
 
-const TypesByCode = Object.freeze(switchKeysAndValues(Types));
+export const TypesByCode = Object.freeze(switchKeysAndValues(Types));
+
+export type FieldTypeCode = $Keys<TypesByCode>;
+export type FieldTypeName = $Keys<Types>;
 
 export default { Types, TypesByCode };
