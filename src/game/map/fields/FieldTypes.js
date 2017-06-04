@@ -1,4 +1,4 @@
-import {switchKeysAndValues} from '../utils/ObjectUtils';
+import {switchKeysAndValues} from '../../../utils/ObjectUtils';
 
 const Types = Object.freeze({
     rock: 0,

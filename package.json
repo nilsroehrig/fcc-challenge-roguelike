@@ -1,28 +1,29 @@
 {
-  "name": "fcc-challenge-roguelike",
-  "version": "0.1.0",
-  "private": true,
-  "dependencies": {
-    "normalize.css": "^7.0.0",
-    "prop-types": "^15.5.10",
-    "react": "^15.5.4",
-    "react-dom": "^15.5.4",
-    "react-redux": "^5.0.5",
-    "redux": "^3.6.0",
-    "redux-devtools": "^3.4.0",
-    "uuid": "^3.0.1"
-  },
-  "devDependencies": {
-    "eslint": "^3.19.0",
-    "eslint-config-airbnb": "^15.0.1",
-    "react-scripts": "1.0.6",
-    "stylelint": "^7.10.1",
-    "stylelint-config-standard": "^16.0.0"
-  },
-  "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build",
-    "test": "react-scripts test --env=jsdom",
-    "eject": "react-scripts eject"
-  }
+    "homepage": ".",
+    "name": "fcc-challenge-roguelike",
+    "version": "0.1.0",
+    "private": true,
+    "dependencies": {
+        "normalize.css": "^7.0.0",
+        "prop-types": "^15.5.10",
+        "react": "^15.5.4",
+        "react-dom": "^15.5.4",
+        "react-redux": "^5.0.5",
+        "redux": "^3.6.0",
+        "redux-devtools": "^3.4.0",
+        "uuid": "^3.0.1"
+    },
+    "devDependencies": {
+        "eslint": "^3.19.0",
+        "eslint-config-airbnb": "^15.0.1",
+        "react-scripts": "1.0.6",
+        "stylelint": "^7.10.1",
+        "stylelint-config-standard": "^16.0.0"
+    },
+    "scripts": {
+        "start": "react-scripts start",
+        "build": "react-scripts build",
+        "test": "react-scripts test --env=jsdom",
+        "eject": "react-scripts eject"
+    }
 }

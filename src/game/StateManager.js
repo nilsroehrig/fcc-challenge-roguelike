@@ -1,5 +1,5 @@
 import getWeapon from './Weapons';
-import FieldTypes from './FieldTypes';
+import FieldTypes from './map/fields/FieldTypes';
 import DungeonGenerator from './DungeonGenerator';
 import EnemyGenerator from './EnemyGenerator';
 import { randomIntBetween } from '../utils/MathUtils';

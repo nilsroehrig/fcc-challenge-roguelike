@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import FieldTypes from '../../game/FieldTypes';
+import FieldTypes from '../../game/map/fields/FieldTypes';
 import './Cell.css';
 
 export default function Cell(props) {

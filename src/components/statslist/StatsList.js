@@ -20,7 +20,7 @@ export default function StatsList(props) {
             <li className="StatsList__item">
                 Level: <strong>{props.level}</strong>
             </li>
-            <li className="StateList__item">
+            <li className="StatsList__item">
                 Dungeon: <strong>{props.dungeonLevel}</strong>
             </li>
         </ul>

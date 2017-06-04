@@ -1,7 +1,10 @@
-import FieldTypes from './FieldTypes';
+import FieldTypes from './map/fields/FieldTypes';
 import { shuffle, shuffleImmutable } from '../utils/ArrayUtils';
 import { createRandomRoom } from './RoomGenerator';
 import { randomIntBetween } from '../utils/MathUtils';
+
+import Field from './map/fields/Field';
+import DungeonMap from './map/DungeonMap';
 
 function cloneMap(map) {
     return map.map(row => row.map(field => Object.assign({}, field)));
@@ -12,7 +15,7 @@ function initMap(width, height) {
     for (let h = 0; h < height; h++) {
         map[h] = [];
         for (let w = 0; w < width; w++) {
-            map[h][w] = { type: FieldTypes.Types.rock, x: w, y: h };
+            map[h][w] = new Field({ type: FieldTypes.Types.rock, x: w, y: h });
         }
     }
     return map;
@@ -174,7 +177,7 @@ function generate(level = 1, width = 51, height = 35) {
 
     const mapWidth = width;
     const mapHeight = height;
-    let map = initMap(mapWidth, mapHeight);
+    let map = new DungeonMap({ width, height });
 
     const x = Math.floor(mapWidth / 2);
     const y = Math.floor(mapHeight / 2);
