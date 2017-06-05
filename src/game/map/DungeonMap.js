@@ -16,15 +16,6 @@ export type DungeonMapProperties = {
     id?: string
 };
 
-function deb(map){
-    let str = '';
-    const md = map;
-    str = md.reduce((ac, rw) =>
-        ac + rw.reduce((acc, fd) => acc + fd.getType(), '') + '\n'
-        , str);
-    console.log(str);
-}
-
 function createMapData(width: number, height: number): DungeonMapData {
     const map = [];
     for (let h = 0; h < height; h++) {
@@ -67,6 +58,13 @@ function getFreeFieldsFromMap(mapData: DungeonMapData): Array<Field> {
     []);
 }
 
+function flatifyMapData(mapData: DungeonMapData): Array<Field> {
+    return mapData.reduce((acc, row) => {
+        acc.push(...row);
+        return acc;
+    }, []);
+}
+
 export default class DungeonMap {
     getDimensions: Function;
     getField: Function;
@@ -75,10 +73,12 @@ export default class DungeonMap {
     getState: Function;
     coordinatesOutOfBounds: Function;
     getFreeFields: Function;
+    getFlatMap: Function;
     constructor(params: DungeonMapProperties) {
         const { width, height } = params;
         const id = params.id || uuid.v4();
         const mapData: DungeonMapData = params.mapData || createMapData(width, height);
+        const flatMap: Array<Field> = flatifyMapData(mapData);
 
         this.getDimensions = function getDimensions(): Rect {
             return Object.freeze({ width, height });
@@ -126,6 +126,10 @@ export default class DungeonMap {
 
         this.getFreeFields = function getFreeFields(): Array<Field> {
             return Object.freeze(getFreeFieldsFromMap(mapData));
+        };
+
+        this.getFlatMap = function getFlatMap(): Array<Field> {
+            return Object.freeze([...flatMap]);
         };
 
         Object.freeze(this);

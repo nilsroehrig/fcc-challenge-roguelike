@@ -8,16 +8,6 @@ import DungeonMap from './map/DungeonMap';
 import Room from './map/Room';
 import Field from './map/fields/Field';
 
-
-function deb(map){
-    let str = '';
-    const md = map.getState().mapData;
-    str = md.reduce((ac, rw) =>
-        ac + rw.reduce((acc, fd) => acc + fd.getType(), '') + '\n'
-    , str);
-    console.log(str);
-}
-
 function placeRoom(room: Room, map: DungeonMap): DungeonMap {
     const { left, top, right, bottom } = room.getEdges();
     const coordinatePairs = [

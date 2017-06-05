@@ -1,37 +1,38 @@
+// @flow
 import getWeapon from './Weapons';
-import FieldTypes from './map/fields/FieldTypes';
+import { Types } from './map/fields/FieldTypes';
 import DungeonGenerator from './DungeonGenerator';
 import EnemyGenerator from './EnemyGenerator';
-import { randomIntBetween } from '../utils/MathUtils';
+import { randomIntBetween, randomBetween } from '../utils/MathUtils';
 
-function createEnemies(flatMap, level) {
+import Field from './map/fields/Field';
+
+import type { Point } from '../types/BasicTypes';
+
+function createEnemies(flatMap: Array<Field>, level: number): Array<Object> {
     const enemyFields = flatMap.filter(field =>
-        field.type === FieldTypes.Types.enemy || field.type === FieldTypes.Types.boss);
+        field.type === Types.enemy || field.getType() === Types.boss);
     return enemyFields.map((enemyField) => {
-        const { x, y } = enemyField;
-        return EnemyGenerator.generate(x, y, level, enemyField.type === FieldTypes.Types.boss);
+        const { x, y } = enemyField.getPosition();
+        return EnemyGenerator.generate(x, y, level, enemyField.getType() === Types.boss);
     });
 }
 
-function createNewLevel(level = undefined) {
+function createNewLevel(level: number): Object {
     const dungeon = DungeonGenerator.generate(level);
-    const flatMap = dungeon.map.reduce((acc, row) => {
-        acc.push(...row);
-        return acc;
-    }, []);
-
-    const { x, y } = flatMap.filter(item => item.type === FieldTypes.Types.player)[0];
+    const { map } = dungeon;
+    const flatMap = map.getFlatMap();
+    const { x, y } = flatMap.filter(field => field.getType() === Types.player)[0];
     const enemies = createEnemies(flatMap, level || 1);
-    enemies.forEach((enemy) => {
-        const { position } = enemy;
-        dungeon.map[position.y][position.x].img = enemy.img;
-    });
-
+    const enemyFields = enemies.map(enemy =>
+        map.getField({ ...enemy.position }).setImage(enemy.img)
+    );
+    dungeon.map = map.setFields(enemyFields);
     return { dungeon, enemies, position: { x, y } };
 }
 
-export function createInitialState() {
-    const level = createNewLevel();
+export function createInitialState(): Object {
+    const level = createNewLevel(1);
     return {
         dungeon: level.dungeon,
         enemies: level.enemies,
@@ -48,95 +49,82 @@ export function createInitialState() {
     };
 }
 
-function copyMap(map) {
-    return map.map(row => row.map(field => Object.assign({}, field)));
-}
-
-function removeFromMap(field, map) {
-    return map.slice().map((row) => {
-        const idx = row.findIndex(f => f.x === field.x && f.y === field.y);
-        if (idx === -1) {
-            return row;
-        }
-        const newRow = row.slice();
-        newRow[idx] = Object.assign({}, newRow[idx], { type: FieldTypes.Types.earth, img: null });
-        return newRow;
-    });
-}
-
-function killEnemy(field, state) {
-    const filteredEnemies = state.enemies.filter((enemy) => {
-        const { x, y } = enemy.position;
-        return (field.x !== x || field.y !== y);
-    });
-    const newMap = removeFromMap(field, state.dungeon.map);
+function killEnemy(field: Field, state: Object): Object {
     return Object.assign({}, state, {
-        enemies: filteredEnemies,
+        enemies: state.enemies.filter((enemy) => {
+            const { x, y } = enemy.position;
+            return (field.x !== x || field.y !== y);
+        }),
         dungeon: Object.assign({}, state.dungeon, {
-            map: newMap
+            map: state.dungeon.map.setField(field.setType(Types.earth))
         })
     });
 }
 
-function levelUp(player) {
-    const newPlayer = Object.assign({}, player);
-    newPlayer.level += 1;
-    newPlayer.attack += randomIntBetween(8, 12) * newPlayer.level;
-    return newPlayer;
+function levelUp(player: Object): Object {
+    const level = player.level + 1;
+    return Object.assign({}, player, {
+        level,
+        attack: (player.attack + randomIntBetween(8, 12)) * level
+    });
 }
 
-function getEnemy(field, state) {
-    const { x, y } = field;
+function getEnemy(field: Field, state: Object): Object {
+    const { x, y } = field.getPosition();
     return state.enemies.filter(enemy =>
         enemy.position.x === x && enemy.position.y === y
     )[0];
 }
 
-function updateEnemy(newEnemy, state) {
+function updateEnemy(newEnemy: Object, state: Object): Object {
     const enemies = state.enemies.slice();
     const idx = enemies.findIndex(enemy => enemy.id === newEnemy.id);
     enemies[idx] = newEnemy;
     return Object.assign({}, state, { enemies });
 }
 
-function moveToField(field, state) {
+function moveToField(field: Field, state: Object): Object {
     const pX = state.player.position.x;
     const pY = state.player.position.y;
-    const fX = field.x;
-    const fY = field.y;
+    const fX = field.getPosition().x;
+    const fY = field.getPosition().y;
 
-    const mapCopy = copyMap(state.dungeon.map);
-
-    mapCopy[pY][pX] = Object.assign({}, mapCopy[pY][pX], { type: FieldTypes.Types.earth });
-    mapCopy[fY][fX] = Object.assign({}, mapCopy[fY][fX], { type: FieldTypes.Types.player });
+    const map = state.dungeon.map.setFields([
+        field.setType(Types.player),
+        state.dungeon.map.getField(pX, pY).setType(Types.earth)
+    ]);
 
     return Object.assign({}, state, {
         player: Object.assign({}, state.player, { position: { x: fX, y: fY } }),
-        dungeon: Object.assign({}, state.dungeon, { map: mapCopy })
+        dungeon: Object.assign({}, state.dungeon, { map })
     });
 }
 
-function calculateCritical(attack, chance) {
+function gameOver(state: Object): Object {
+    return Object.assign({}, state, { gameOver: true });
+}
+
+function calculateCritical(attack: number, chance: number): number {
     return (randomIntBetween(0, 100) < chance)
         ? attack * 0.5
         : 0;
 }
 
-function gameOver(state) {
-    return Object.assign({}, state, { gameOver: true });
+function randomFactor(attack: number): number {
+    return attack * randomBetween(0.9, 1.1);
 }
 
-function fight(field, state) {
+function fight(field: Field, state: Object): Object {
     let player = Object.assign({}, state.player);
-    let newState = {};
     const enemy = Object.assign({}, getEnemy(field, state));
     const attackPower = player.attack + player.weapon.attack;
+    let newState = {};
 
     player.health -= Math.floor(
-        enemy.attack + calculateCritical(enemy.attack, enemy.critChance)
+        randomFactor(enemy.attack + calculateCritical(enemy.attack, enemy.critChance))
     );
     enemy.health -= Math.floor(
-        attackPower + calculateCritical(attackPower, player.weapon.critChance)
+        randomFactor(attackPower + calculateCritical(attackPower, player.weapon.critChance))
     );
 
     if (player.health <= 0) {
@@ -160,24 +148,29 @@ function fight(field, state) {
     return Object.assign({}, state, newState);
 }
 
-function pickUpHealth(field, state) {
-    const amount = state.dungeon.level * 30;
-    const player = Object.assign({}, state.player);
-    const map = removeFromMap(field, state.dungeon.map);
-    const dungeon = Object.assign({}, state.dungeon, { map });
-    player.health += amount;
-    return moveToField(field, Object.assign({}, state, { player, dungeon }));
+function pickUpHealth(field: Field, state: Object): Object {
+    return moveToField(field, Object.assign({}, state, {
+        player: Object.assign({}, state.player, {
+            health: state.player.health + (30 * state.dungeon.level)
+        }),
+        dungeon: Object.assign({}, state.dungeon, {
+            map: state.dungeon.map.setField(field.setType(Types.earth))
+        })
+    }));
 }
 
-function pickUpWeapon(field, state) {
-    const player = Object.assign({}, state.player);
-    const map = removeFromMap(field, state.dungeon.map);
-    const dungeon = Object.assign({}, state.dungeon, { map });
-    player.weapon = getWeapon(dungeon.level);
-    return moveToField(field, Object.assign({}, state, { player, dungeon }));
+function pickUpWeapon(field: Field, state: Object): Object {
+    return moveToField(field, Object.assign({}, state, {
+        player: Object.assign({}, state.player, {
+            weapon: getWeapon(state.dungeon.level)
+        }),
+        dungeon: Object.assign({}, state.dungeon, {
+            map: state.dungeon.map.setField(field.setType(Types.earth))
+        })
+    }));
 }
 
-function enterNextLevel(state) {
+function enterNextLevel(state: Object): Object {
     const { dungeon, enemies, position } = createNewLevel(state.dungeon.level + 1);
     const player = Object.assign({}, state.player, { position });
     return Object.assign({}, state, {
@@ -187,11 +180,11 @@ function enterNextLevel(state) {
     });
 }
 
-function takeAction(position, state) {
-    const field = Object.assign({}, state.dungeon.map[position.y][position.x]);
-    const types = FieldTypes.Types;
+function takeAction(position: Point, state: Object) {
+    const field = state.dungeon.map.getField({ ...position });
+    const types = Types;
 
-    switch (field.type) {
+    switch (field.getType()) {
         case types.rock:
             return state;
 
@@ -214,7 +207,7 @@ function takeAction(position, state) {
     }
 }
 
-function moveUp(state) {
+function moveUp(state: Object): Object {
     const nextField = {
         x: state.player.position.x,
         y: state.player.position.y - 1
@@ -223,7 +216,7 @@ function moveUp(state) {
     return takeAction(nextField, state);
 }
 
-function moveRight(state) {
+function moveRight(state: Object): Object {
     const nextField = {
         x: state.player.position.x + 1,
         y: state.player.position.y
@@ -232,7 +225,7 @@ function moveRight(state) {
     return takeAction(nextField, state);
 }
 
-function moveDown(state) {
+function moveDown(state: Object): Object {
     const nextField = {
         x: state.player.position.x,
         y: state.player.position.y + 1
@@ -241,7 +234,7 @@ function moveDown(state) {
     return takeAction(nextField, state);
 }
 
-function moveLeft(state) {
+function moveLeft(state: Object): Object {
     const nextField = {
         x: state.player.position.x - 1,
         y: state.player.position.y
@@ -250,8 +243,8 @@ function moveLeft(state) {
     return takeAction(nextField, state);
 }
 
-export function getReducer(initialState) {
-    return function reducer(state, action) {
+export function getReducer(initialState: Object): Function {
+    return function reducer(state: Object, action: Object) {
         if (state === undefined) {
             return initialState;
         }

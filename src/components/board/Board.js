@@ -1,11 +1,13 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import uuid from 'uuid';
+
 import Row from '../row/Row';
 
 import './Board.css';
 
 export default function Board(props) {
-    const rows = props.map.map((row, index) => <Row cells={row} key={index} />);
+    const rows = props.map.getState().mapData.map(row => <Row cells={row} key={uuid.v4()} />);
     return (
         <div className="Board">
             {rows}
