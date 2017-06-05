@@ -85,7 +85,6 @@ class Room {
         });
         const position = Object.freeze({ x: args.x, y: args.y });
         const roomEdges = args.position || calculatePosition(dimensions, position);
-
         function getPosition(): RoomEdges {
             return roomEdges;
         }

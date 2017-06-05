@@ -1,58 +1,51 @@
-import FieldTypes from './map/fields/FieldTypes';
+// @flow
+import { Types } from './map/fields/FieldTypes';
 import { shuffle, shuffleImmutable } from '../utils/ArrayUtils';
-import { createRandomRoom } from './RoomGenerator';
-import { randomIntBetween } from '../utils/MathUtils';
+import { createRandomRoomDimensions } from './map/RoomGenerator';
+import { oddify, randomIntBetween } from '../utils/MathUtils';
 
-import Field from './map/fields/Field';
 import DungeonMap from './map/DungeonMap';
+import Room from './map/Room';
+import Field from './map/fields/Field';
 
-function cloneMap(map) {
-    return map.map(row => row.map(field => Object.assign({}, field)));
+
+function deb(map){
+    let str = '';
+    const md = map.getState().mapData;
+    str = md.reduce((ac, rw) =>
+        ac + rw.reduce((acc, fd) => acc + fd.getType(), '') + '\n'
+    , str);
+    console.log(str);
 }
 
-function initMap(width, height) {
-    const map = [];
-    for (let h = 0; h < height; h++) {
-        map[h] = [];
-        for (let w = 0; w < width; w++) {
-            map[h][w] = new Field({ type: FieldTypes.Types.rock, x: w, y: h });
-        }
+function placeRoom(room: Room, map: DungeonMap): DungeonMap {
+    const { left, top, right, bottom } = room.getEdges();
+    const coordinatePairs = [
+        { x: left, y: top },
+        { x: left, y: bottom },
+        { x: right, y: top },
+        { x: right, y: bottom }
+    ];
+    if (coordinatePairs.some(c => map.coordinatesOutOfBounds(c))) {
+        return map;
     }
-    return map;
-}
-
-function outOfMapBounds(room, map) {
-    const pos = room.getPosition();
-    return (
-        pos.top < 1 || pos.top >= map.length - 1 ||
-        pos.bottom < 1 || pos.bottom >= map.length - 1 ||
-        pos.left < 1 || pos.left >= map[0].length - 1 ||
-        pos.right < 1 || pos.right >= map[0].length - 1
-    );
-}
-
-function placeRoom(room, map) {
-    if (outOfMapBounds(room, map)) {
-        throw new Error('Room is out of map bounds.');
-    }
-
-    const pos = room.getPosition();
-
-    const newMap = cloneMap(map);
-    for (let h = pos.top; h <= pos.bottom; h++) {
-        for (let w = pos.left; w <= pos.right; w++) {
-            if (newMap[h][w].type !== FieldTypes.Types.rock) {
-                throw new Error('Space already occupied.');
+    const fieldCache = [];
+    for (let h = top; h <= bottom; h++) {
+        for (let w = left; w <= right; w++) {
+            const field = map.getField(w, h);
+            if (!field.isOccupiedBy(Types.rock)) {
+                return map;
             }
-            newMap[h][w].type = FieldTypes.Types.earth;
+            fieldCache.push(field.setType(Types.earth));
         }
     }
 
-    return newMap;
+    return map.setFields(fieldCache);
 }
 
 function findNextPosition(width, height, randomWall) {
-    const { direction, x, y } = randomWall;
+    const { direction } = randomWall;
+    const { x, y } = randomWall.position;
 
     if (direction === 'top') {
         return {
@@ -79,112 +72,104 @@ function findNextPosition(width, height, randomWall) {
     return { x, y };
 }
 
-function buildNextRoom(startingRoom, map) {
+function buildNextRoom(startingRoom: Room, map: DungeonMap): DungeonMap {
     const shuffledWalls = shuffle(['top', 'bottom', 'left', 'right']);
-    let newMap = cloneMap(map);
+    let newMap = map;
+
     for (let i = 0; i < shuffledWalls.length; i++) {
-        const randomWall = startingRoom.getRandomWall(shuffledWalls[i]);
-        const nextRoom = createRandomRoom();
-        try {
-            const newPos = findNextPosition(nextRoom.width, nextRoom.height, randomWall);
-            nextRoom.setX(newPos.x);
-            nextRoom.setY(newPos.y);
-            newMap = placeRoom(nextRoom, newMap);
-            newMap[randomWall.y][randomWall.x].type = FieldTypes.Types.earth;
-        } catch (e) {
-            continue;
+        const randomWallField = startingRoom.getRandomWallField(shuffledWalls[i]);
+        const nextDimensions = createRandomRoomDimensions();
+        const nextPosition = findNextPosition(
+            nextDimensions.width,
+            nextDimensions.height,
+            randomWallField
+        );
+
+        const nextRoom = new Room({ ...nextDimensions, ...nextPosition });
+        newMap = placeRoom(nextRoom, map);
+        if (newMap !== map) {
+            const { x, y } = randomWallField.position;
+            const tunnel = newMap.getField(x, y).setType(Types.earth);
+            newMap = newMap.setField(tunnel);
+            newMap = buildNextRoom(nextRoom, newMap);
+        } else {
+            break;
         }
-
-        newMap = buildNextRoom(nextRoom, newMap);
     }
-
     return newMap;
 }
 
-function getFreeFields(map) {
-    return map.reduce((acc, row) =>
-        acc.concat(row.filter(cell => cell.type === FieldTypes.Types.earth)),
-    []);
+function getFreeFields(map: DungeonMap): Array<Field> {
+    return map.getFreeFields();
 }
 
-function hasOnlyFreeNeighbours(x, y, map) {
+function hasOnlyFreeNeighbours(field: Field, map: DungeonMap): boolean {
     let passed = true;
+    const { x, y } = field.getPosition();
 
     for (let h = y - 1; h <= y + 1; h++) {
         for (let w = x - 1; w <= x + 1; w++) {
             if (!(w === x && y === h)) {
-                passed = passed && (map[h][w].type === FieldTypes.Types.earth);
+                passed = passed && (map.getField(w, h).getType() === Types.earth);
             }
         }
     }
     return passed;
 }
 
-function getFreeFieldsWithFreeNeighbors(map) {
-    return getFreeFields(map).filter(field => hasOnlyFreeNeighbours(field.x, field.y, map));
+function getFreeFieldsWithFreeNeighbors(map: DungeonMap): Array<Field> {
+    return getFreeFields(map).filter(field => hasOnlyFreeNeighbours(field, map));
 }
 
-function getRandomFreeFields(map, amount) {
+function getRandomFreeFields(map: DungeonMap, amount: number): Array<Field> {
     const shuffledFields = shuffle(shuffleImmutable(getFreeFieldsWithFreeNeighbors(map)));
     return shuffledFields.slice(0, amount);
 }
 
-function spawnPlayer(map) {
+function spawnPlayer(map: DungeonMap): DungeonMap {
     const freeField = getRandomFreeFields(map, 1)[0];
-    freeField.type = FieldTypes.Types.player;
-    return map;
+    return map.setField(freeField.setType(Types.player));
 }
 
-function spawnBoss(map) {
-    getRandomFreeFields(map, 1)[0].type = FieldTypes.Types.boss;
-    return map;
+function spawnBoss(map: DungeonMap): DungeonMap {
+    const freeField = getRandomFreeFields(map, 1)[0];
+    return map.setField(freeField.setType(Types.boss));
 }
 
 function spawnExit(map) {
-    getRandomFreeFields(map, 1)[0].type = FieldTypes.Types.exit;
-    return map;
+    const freeField = getRandomFreeFields(map, 1)[0];
+    return map.setField(freeField.setType(Types.exit));
 }
 
 function spawnWeapon(map) {
-    getRandomFreeFields(map, 1)[0].type = FieldTypes.Types.weapon;
-    return map;
+    const freeField = getRandomFreeFields(map, 1)[0];
+    return map.setField(freeField.setType(Types.weapon));
 }
 
 function spawnHealth(map, number) {
-    const fields = getRandomFreeFields(map, number);
-    const newMap = cloneMap(map);
-    for (let i = 0; i < fields.length; i++) {
-        const { x, y } = fields[i];
-        newMap[y][x] = Object.assign({}, fields[i], { type: FieldTypes.Types.health });
-    }
-    return newMap;
+    let fields = getRandomFreeFields(map, number);
+    fields = fields.map(field => field.setType(Types.health));
+    return map.setFields(fields);
 }
 
 function spawnEnemies(map, number) {
-    const fields = getRandomFreeFields(map, number);
-    const newMap = cloneMap(map);
-    for (let i = 0; i < fields.length; i++) {
-        const { x, y } = fields[i];
-        newMap[y][x] = Object.assign({}, fields[i], { type: FieldTypes.Types.enemy });
-    }
-    return newMap;
+    let fields = getRandomFreeFields(map, number);
+    fields = fields.map(field => field.setType(Types.enemy));
+    return map.setFields(fields);
 }
 
-function generate(level = 1, width = 51, height = 35) {
-    if (width < 14 || height < 14) {
-        throw new Error('Width and height of the dungeon must at least be 14');
-    }
+function generate(level: number = 1, w: number = 50, h: number = 25) {
+    const width = oddify(w);
+    const height = oddify(h);
 
-    const mapWidth = width;
-    const mapHeight = height;
     let map = new DungeonMap({ width, height });
 
-    const x = Math.floor(mapWidth / 2);
-    const y = Math.floor(mapHeight / 2);
+    const x = Math.ceil(width / 2);
+    const y = Math.ceil(height / 2);
 
-    const newRoom = createRandomRoom(x, y);
+    const initialRoom = new Room({ ...createRandomRoomDimensions(), x, y });
+    map = buildNextRoom(initialRoom, placeRoom(initialRoom, map));
 
-    map = buildNextRoom(newRoom, placeRoom(newRoom, map));
     map = spawnPlayer(map);
     if (level === 5) {
         map = spawnBoss(map);

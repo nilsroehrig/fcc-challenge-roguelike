@@ -16,6 +16,15 @@ export type DungeonMapProperties = {
     id?: string
 };
 
+function deb(map){
+    let str = '';
+    const md = map;
+    str = md.reduce((ac, rw) =>
+        ac + rw.reduce((acc, fd) => acc + fd.getType(), '') + '\n'
+        , str);
+    console.log(str);
+}
+
 function createMapData(width: number, height: number): DungeonMapData {
     const map = [];
     for (let h = 0; h < height; h++) {
@@ -23,62 +32,102 @@ function createMapData(width: number, height: number): DungeonMapData {
         for (let w = 0; w < width; w++) {
             map[h][w] = new Field({ type: Types.rock, x: w, y: h });
         }
-        Object.freeze(map[h]);
     }
-    Object.freeze(map);
     return map;
 }
 
-function copyMapDataWithClonedRow(mapData: DungeonMapData, row: number): DungeonMapData {
-    const newMapData = [...mapData];
-    newMapData[row] = [...mapData[row]];
-    return newMapData;
+function updateMap(mapData: DungeonMapData, row: DungeonMapRow) {
+    const { y } = row[0].getPosition();
+    const newMap = [...mapData];
+    newMap[y] = row;
+    return newMap;
+}
+
+function updateRow(row: DungeonMapRow, field: Field) {
+    const newRow = [...row];
+    const { x } = field.getPosition();
+    newRow[x] = field;
+    return newRow;
 }
 
 function updateMapDataWithField(mapData: DungeonMapData, field: Field) {
-    const { x, y } = field.getPosition();
-    const newMapData = copyMapDataWithClonedRow(mapData, y);
-    newMapData[y][x] = field;
-    Object.freeze(newMapData[y]);
-    return Object.freeze(newMapData);
+    const { y } = field.getPosition();
+    const newRow = updateRow(mapData[y], field);
+    return updateMap(mapData, newRow);
+}
+
+function freezeMap(mapData: DungeonMapData): DungeonMapData {
+    mapData.forEach(row => Object.freeze(row));
+    return Object.freeze(mapData);
+}
+
+function getFreeFieldsFromMap(mapData: DungeonMapData): Array<Field> {
+    return mapData.reduce((acc, row) =>
+        acc.concat(row.filter(field => field.getType() === Types.earth)),
+    []);
 }
 
 export default class DungeonMap {
     getDimensions: Function;
     getField: Function;
     setField: Function;
+    setFields: Function;
     getState: Function;
+    coordinatesOutOfBounds: Function;
+    getFreeFields: Function;
     constructor(params: DungeonMapProperties) {
         const { width, height } = params;
         const id = params.id || uuid.v4();
         const mapData: DungeonMapData = params.mapData || createMapData(width, height);
 
-        function getDimensions(): Rect {
+        this.getDimensions = function getDimensions(): Rect {
             return Object.freeze({ width, height });
-        }
+        };
 
-        function getField(x: number, y: number): Field {
+        this.getField = function getField(x: number, y: number): Field {
             return mapData[y][x];
-        }
+        };
 
-        function setField(newField: Field): DungeonMap {
+        this.setField = function setField(newField: Field): DungeonMap {
             const newMap = updateMapDataWithField(mapData, newField);
-            return new DungeonMap({ width, height, id, newMap });
-        }
+            return new DungeonMap({ width, height, id, mapData: newMap });
+        };
 
-        function getState(): DungeonMapProperties {
+        this.setFields = function setFields(fields: Array<Field>): DungeonMap {
+            const rows = fields.reduce((acc, field) => {
+                const { y } = field.getPosition();
+                acc[y] = updateRow(acc[y] || mapData[y], field);
+                return acc;
+            }, []);
+
+            const newMap = [...mapData];
+            rows.forEach((row, index) => {
+                newMap[index] = row;
+            });
+
+            return new DungeonMap({ width, height, id, mapData: newMap });
+        };
+
+        this.getState = function getState(): DungeonMapProperties {
             return Object.freeze({
                 id,
                 width,
                 height,
-                mapData
+                mapData: freezeMap(mapData)
             });
-        }
+        };
 
-        this.getDimensions = getDimensions;
-        this.getField = getField;
-        this.setField = setField;
-        this.getState = getState;
+        this.coordinatesOutOfBounds = function coordinatesOutOfBounds(
+            coordinates: { x: number, y: number }
+        ): boolean {
+            const { x, y } = coordinates;
+            return x < 0 || x >= width || y < 0 || y >= height;
+        };
+
+        this.getFreeFields = function getFreeFields(): Array<Field> {
+            return Object.freeze(getFreeFieldsFromMap(mapData));
+        };
+
         Object.freeze(this);
     }
 }

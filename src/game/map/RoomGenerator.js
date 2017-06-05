@@ -1,28 +1,30 @@
 // @flow
 import { randomBetween } from '../../utils/MathUtils';
-import Room from './Room';
 
-function createSmallRoom(x: number, y: number): Room {
+import type { Rect } from '../../types/BasicTypes';
+
+function createSmallRect(): Rect {
     const width = Math.floor(randomBetween(3, 7));
     const height = Math.floor(randomBetween(3, 7));
-    return new Room({ width, height, x, y });
+    return { width, height };
 }
 
-function createMediumRoom(x: number, y: number): Room {
+function createMediumRect(): Rect {
     const width = Math.floor(randomBetween(7, 9));
     const height = Math.floor(randomBetween(7, 9));
-    return new Room({ width, height, x, y });
+    return { width, height };
 }
 
-function createLargeRoom(x: number, y: number): Room {
+function createLargeRect(): Rect {
     const width = Math.floor(randomBetween(9, 13));
     const height = Math.floor(randomBetween(9, 13));
-    return new Room({ width, height, x, y });
+    return { width, height };
+
 }
 
-export function createRandomRoom(x: number, y: number): Room {
-    const possibilities = [createSmallRoom, createMediumRoom, createLargeRoom];
-    return possibilities[Math.floor(randomBetween(0, 3))](x, y);
+export function createRandomRoomDimensions(): Rect {
+    const possibilities = [createSmallRect, createMediumRect, createLargeRect];
+    return Object.freeze(possibilities[Math.floor(randomBetween(0, 3))]());
 }
 
-export default { createRandomRoom };
+export default { createRandomRoomDimensions };

@@ -20,6 +20,7 @@ export default class Field {
     setImage: Function;
     getId: Function;
     getState: Function;
+    isOccupiedBy: Function;
     constructor(params: FieldProperties) {
         const { x, y, type, image } = params;
         const id = params.id || uuid.v4();
@@ -52,6 +53,10 @@ export default class Field {
             return Object.freeze({ x, y, type, id, image });
         }
 
+        function isOccupiedBy(testType: FieldTypeCode): boolean {
+            return (type === testType);
+        }
+
         this.getPosition = getPosition;
         this.getId = getId;
         this.getState = getState;
@@ -59,7 +64,7 @@ export default class Field {
         this.setType = setType;
         this.getImage = getImage;
         this.setImage = setImage;
-
+        this.isOccupiedBy = isOccupiedBy;
         Object.freeze(this);
     }
 }
