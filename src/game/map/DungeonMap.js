@@ -84,7 +84,8 @@ export default class DungeonMap {
             return Object.freeze({ width, height });
         };
 
-        this.getField = function getField(x: number, y: number): Field {
+        this.getField = function getField(x: number, y: number): Field | null {
+            if (mapData[y] === undefined || mapData[y][x] === undefined) return null;
             return mapData[y][x];
         };
 

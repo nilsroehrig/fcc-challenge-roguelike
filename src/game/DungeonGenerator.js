@@ -67,6 +67,7 @@ function buildNextRoom(startingRoom: Room, map: DungeonMap): DungeonMap {
     let newMap = map;
 
     for (let i = 0; i < shuffledWalls.length; i++) {
+        const mapInLoop = newMap;
         const randomWallField = startingRoom.getRandomWallField(shuffledWalls[i]);
         const nextDimensions = createRandomRoomDimensions();
         const nextPosition = findNextPosition(
@@ -76,21 +77,15 @@ function buildNextRoom(startingRoom: Room, map: DungeonMap): DungeonMap {
         );
 
         const nextRoom = new Room({ ...nextDimensions, ...nextPosition });
-        newMap = placeRoom(nextRoom, map);
-        if (newMap !== map) {
+        newMap = placeRoom(nextRoom, newMap);
+        if (newMap !== mapInLoop) {
             const { x, y } = randomWallField.position;
             const tunnel = newMap.getField(x, y).setType(Types.earth);
             newMap = newMap.setField(tunnel);
             newMap = buildNextRoom(nextRoom, newMap);
-        } else {
-            break;
         }
     }
     return newMap;
-}
-
-function getFreeFields(map: DungeonMap): Array<Field> {
-    return map.getFreeFields();
 }
 
 function hasOnlyFreeNeighbours(field: Field, map: DungeonMap): boolean {
@@ -100,7 +95,12 @@ function hasOnlyFreeNeighbours(field: Field, map: DungeonMap): boolean {
     for (let h = y - 1; h <= y + 1; h++) {
         for (let w = x - 1; w <= x + 1; w++) {
             if (!(w === x && y === h)) {
-                passed = passed && (map.getField(w, h).getType() === Types.earth);
+                const f = map.getField(w, h);
+                if (f === null) {
+                    passed = false;
+                } else {
+                    passed = passed && (map.getField(w, h).getType() === Types.earth);
+                }
             }
         }
     }
@@ -108,11 +108,11 @@ function hasOnlyFreeNeighbours(field: Field, map: DungeonMap): boolean {
 }
 
 function getFreeFieldsWithFreeNeighbors(map: DungeonMap): Array<Field> {
-    return getFreeFields(map).filter(field => hasOnlyFreeNeighbours(field, map));
+    return map.getFreeFields().filter(field => hasOnlyFreeNeighbours(field, map));
 }
 
 function getRandomFreeFields(map: DungeonMap, amount: number): Array<Field> {
-    const shuffledFields = shuffle(shuffleImmutable(getFreeFieldsWithFreeNeighbors(map)));
+    const shuffledFields = shuffle(shuffleImmutable(map.getFreeFields()));
     return shuffledFields.slice(0, amount);
 }
 
@@ -127,7 +127,7 @@ function spawnBoss(map: DungeonMap): DungeonMap {
 }
 
 function spawnExit(map) {
-    const freeField = getRandomFreeFields(map, 1)[0];
+    const freeField = shuffle(getFreeFieldsWithFreeNeighbors(map))[0];
     return map.setField(freeField.setType(Types.exit));
 }
 
@@ -161,11 +161,13 @@ function generate(level: number = 1, w: number = 50, h: number = 25) {
     map = buildNextRoom(initialRoom, placeRoom(initialRoom, map));
 
     map = spawnPlayer(map);
+
     if (level === 5) {
         map = spawnBoss(map);
     } else {
         map = spawnExit(map);
     }
+
     map = spawnWeapon(map);
     map = spawnHealth(map, randomIntBetween(5, 10));
     map = spawnEnemies(map, randomIntBetween(5, 10));
