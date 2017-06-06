@@ -10,21 +10,7 @@ import './Board.css';
 
 export default function Board(props) {
     const rows = props.map.getState().mapData.map(row => <Row cells={row} key={uuid.v4()} />);
-
-    // const { map } = props;
-    // let str = '';
-    // map.getFlatMap().forEach((field, idx) => {
-    //     str += field.getType().toString();
-    //     str += ((idx + 1) % map.getState().width === 0) ? '\n' : '';
-    // });
-    // console.log(str);
-
-    // let str = props.map.getState().mapData.reduce((a, r) => {
-    //     return a + r.reduce((ac, f) => ac + f.getType().toString(), '') + '\n';
-    // }, '');
-    //
-    // console.log(str);
-
+    console.log('board rendered');
     return (
         <div className="Board">
             {rows}

@@ -7,6 +7,7 @@ import Field from '../../game/map/fields/Field';
 import './Cell.css';
 
 export default function Cell(props) {
+    console.log('cell rendered');
     const style = (props.field.getImage())
         ? { backgroundImage: `url("${props.field.getImage()}")` }
         : null;

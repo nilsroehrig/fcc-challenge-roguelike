@@ -15,13 +15,7 @@ export default class App extends Component {
 
     componentDidMount() {
         document.addEventListener('keydown', this.handleKeyPress);
-        // const { map } = this.props.appState.dungeon;
-        // let str = '';
-        // map.getFlatMap().forEach((field, idx) => {
-        //     str += field.getType().toString();
-        //     str += ((idx + 1) % map.getState().width === 0) ? '\n' : '';
-        // });
-        // console.log(str);
+        console.log('app did mount');
     }
 
     componentWillUnmount() {

@@ -22,7 +22,7 @@ function createNewLevel(level: number): Object {
     const dungeon = DungeonGenerator.generate(level);
     const { map } = dungeon;
     const flatMap = map.getFlatMap();
-    const { x, y } = flatMap.filter(field => field.getType() === Types.player)[0];
+    const { x, y } = flatMap.filter(field => field.isOccupiedBy(Types.player))[0].getPosition();
     const enemies = createEnemies(flatMap, level || 1);
     const enemyFields = enemies.map(enemy =>
         map.getField(enemy.position.x, enemy.position.y).setImage(enemy.img)
@@ -181,7 +181,8 @@ function enterNextLevel(state: Object): Object {
 }
 
 function takeAction(position: Point, state: Object) {
-    const field = state.dungeon.map.getField({ ...position });
+    const { x, y } = position;
+    const field = state.dungeon.map.getField(x, y);
     const types = Types;
 
     switch (field.getType()) {

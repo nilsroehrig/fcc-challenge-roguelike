@@ -8,6 +8,7 @@ import Cell from '../cell/Cell';
 import './Row.css';
 
 export default function Row(props) {
+    console.log('row rendered');
     const cells = props.cells.map(cell => <Cell field={cell} key={cell.getId()} />);
     return (
         <div className="Row">{cells}</div>
