@@ -14,8 +14,4 @@ export function shuffle(oldArray: Array<any>): Array<any> {
     return array;
 }
 
-export function shuffleImmutable(array: Array<any>): Array<any> {
-    return shuffle(array);
-}
-
 export default { shuffle };

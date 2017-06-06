@@ -1,6 +1,6 @@
 // @flow
 import { Types } from './map/fields/FieldTypes';
-import { shuffle, shuffleImmutable } from '../utils/ArrayUtils';
+import { shuffle } from '../utils/ArrayUtils';
 import { createRandomRoomDimensions } from './map/RoomGenerator';
 import { oddify, randomIntBetween } from '../utils/MathUtils';
 
@@ -112,7 +112,7 @@ function getFreeFieldsWithFreeNeighbors(map: DungeonMap): Array<Field> {
 }
 
 function getRandomFreeFields(map: DungeonMap, amount: number): Array<Field> {
-    const shuffledFields = shuffle(shuffleImmutable(map.getFreeFields()));
+    const shuffledFields = shuffle(getFreeFieldsWithFreeNeighbors(map));
     return shuffledFields.slice(0, amount);
 }
 

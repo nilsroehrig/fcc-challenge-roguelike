@@ -15,6 +15,13 @@ export default class App extends Component {
 
     componentDidMount() {
         document.addEventListener('keydown', this.handleKeyPress);
+        // const { map } = this.props.appState.dungeon;
+        // let str = '';
+        // map.getFlatMap().forEach((field, idx) => {
+        //     str += field.getType().toString();
+        //     str += ((idx + 1) % map.getState().width === 0) ? '\n' : '';
+        // });
+        // console.log(str);
     }
 
     componentWillUnmount() {
@@ -60,7 +67,7 @@ export default class App extends Component {
             <div className="App">
                 <header className="App__header">
                     <h1 className="App__headline">DZC Roguelike</h1>
-                    <StatsList {...player} dungeonLevel={dungeon.level}/>
+                    <StatsList {...player} dungeonLevel={dungeon.level} />
                 </header>
                 <div className="App__board-container">
                     <Board {...dungeon} />

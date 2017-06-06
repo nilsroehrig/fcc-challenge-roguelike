@@ -11,7 +11,7 @@ import type { Point } from '../types/BasicTypes';
 
 function createEnemies(flatMap: Array<Field>, level: number): Array<Object> {
     const enemyFields = flatMap.filter(field =>
-        field.type === Types.enemy || field.getType() === Types.boss);
+        field.getType() === Types.enemy || field.getType() === Types.boss);
     return enemyFields.map((enemyField) => {
         const { x, y } = enemyField.getPosition();
         return EnemyGenerator.generate(x, y, level, enemyField.getType() === Types.boss);
@@ -25,7 +25,7 @@ function createNewLevel(level: number): Object {
     const { x, y } = flatMap.filter(field => field.getType() === Types.player)[0];
     const enemies = createEnemies(flatMap, level || 1);
     const enemyFields = enemies.map(enemy =>
-        map.getField({ ...enemy.position }).setImage(enemy.img)
+        map.getField(enemy.position.x, enemy.position.y).setImage(enemy.img)
     );
     dungeon.map = map.setFields(enemyFields);
     return { dungeon, enemies, position: { x, y } };
