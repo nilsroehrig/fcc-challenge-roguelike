@@ -11,10 +11,6 @@
     justify-content: center;
 }
 
-.GameOver--hidden {
-    display: none;
-}
-
 .GameOver__message {
     background-color: #fff;
     color: #333;

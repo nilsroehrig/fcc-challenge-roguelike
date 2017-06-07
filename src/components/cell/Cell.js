@@ -6,15 +6,23 @@ import Field from '../../game/map/fields/Field';
 
 import './Cell.css';
 
+function CellContent(props) {
+    return <div className="Cell__content" style={props.style} />;
+}
+
+function buildStyle(img) {
+    if (img) {
+        return { backgroundImage: `url("${img}")` };
+    }
+    return img;
+}
+
 export default function Cell(props) {
-    console.log('cell rendered');
-    const style = (props.field.getImage())
-        ? { backgroundImage: `url("${props.field.getImage()}")` }
-        : null;
+    const style = buildStyle(props.field.getImage());
     const type = TypesByCode[props.field.getType()];
     return (
         <div className={`Cell Cell--${type}`}>
-            <div className="Cell__content" style={style} />
+            <CellContent style={style} />
         </div>
     );
 }

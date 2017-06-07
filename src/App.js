@@ -15,7 +15,6 @@ export default class App extends Component {
 
     componentDidMount() {
         document.addEventListener('keydown', this.handleKeyPress);
-        console.log('app did mount');
     }
 
     componentWillUnmount() {
@@ -54,6 +53,17 @@ export default class App extends Component {
         });
     }
 
+    renderGameOver() {
+        return (this.props.appState.gameOver)
+            ? (
+                <GameOver
+                    isWon={this.props.appState.winner}
+                    store={this.props.store}
+                />
+            )
+            : null;
+    }
+
     render() {
         const player = this.props.appState.player;
         const dungeon = this.props.appState.dungeon;
@@ -66,11 +76,7 @@ export default class App extends Component {
                 <div className="App__board-container">
                     <Board {...dungeon} />
                 </div>
-                <GameOver
-                    isHidden={!this.props.appState.gameOver}
-                    isWon={this.props.appState.winner}
-                    store={this.props.store}
-                />
+                {this.renderGameOver()}
                 <footer className="App__footer">
                     <p>Hero, Sword, Potion, Stairs icons are <a href="http://www.freepik.com">designed by Freepik</a></p>
                 </footer>

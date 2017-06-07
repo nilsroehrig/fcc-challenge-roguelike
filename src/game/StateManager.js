@@ -50,15 +50,15 @@ export function createInitialState(): Object {
 }
 
 function killEnemy(field: Field, state: Object): Object {
-    return Object.assign({}, state, {
-        enemies: state.enemies.filter((enemy) => {
-            const { x, y } = enemy.position;
-            return (field.x !== x || field.y !== y);
-        }),
-        dungeon: Object.assign({}, state.dungeon, {
-            map: state.dungeon.map.setField(field.setType(Types.earth))
-        })
+    const enemies = state.enemies.filter((enemy) => {
+        const ep = enemy.position;
+        const fp = field.getPosition();
+        return (fp.x !== ep.x || fp.y !== ep.y);
     });
+    const dungeon = Object.assign({}, state.dungeon, {
+        map: state.dungeon.map.setField(field.setType(Types.earth).setImage(null))
+    });
+    return Object.assign({}, state, { enemies, dungeon });
 }
 
 function levelUp(player: Object): Object {

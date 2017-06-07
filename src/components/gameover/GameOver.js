@@ -6,9 +6,6 @@ import './GameOver.css';
 
 export default function GameOver(props) {
     const classNames = ['GameOver'];
-    if (props.isHidden) {
-        classNames.push('GameOver--hidden');
-    }
     const message = (props.isWon)
         ? 'You have won! Wanna rock again?'
         : 'You have lost! Wanna try again?';
@@ -30,7 +27,7 @@ export default function GameOver(props) {
                         }
                     >Restart</button>
                 </p>
-                <p><a href="http://www.theuselessweb.com/">Nah, somthing else...</a></p>
+                <p><a href="http://www.theuselessweb.com/">Nah, something else...</a></p>
             </div>
         </div>
     );
@@ -38,6 +35,5 @@ export default function GameOver(props) {
 
 GameOver.propTypes = {
     store: PropTypes.object.isRequired,
-    isHidden: PropTypes.bool.isRequired,
     isWon: PropTypes.bool.isRequired
 };

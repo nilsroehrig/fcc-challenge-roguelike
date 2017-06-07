@@ -23,7 +23,7 @@ export default class Field {
     isOccupiedBy: Function;
     constructor(params: FieldProperties) {
         const { x, y, type, image } = params;
-        const id = params.id || uuid.v4();
+        const id = uuid.v4();
 
         function getPosition(): Point {
             return Object.freeze({ x, y });
@@ -34,7 +34,7 @@ export default class Field {
         }
 
         function setType(newType: FieldTypeCode): Field {
-            return new Field({ x, y, image, id, type: newType });
+            return new Field({ x, y, image, type: newType });
         }
 
         function getId(): string {
