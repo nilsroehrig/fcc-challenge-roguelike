@@ -118,6 +118,7 @@ function fight(field: Field, state: Object): Object {
     let player = Object.assign({}, state.player);
     const enemy = Object.assign({}, getEnemy(field, state));
     const attackPower = player.attack + player.weapon.attack;
+    const { x, y } = field.getPosition();
     let newState = {};
 
     player.health -= Math.floor(
@@ -136,7 +137,8 @@ function fight(field: Field, state: Object): Object {
         if (player.exp > (player.level * 1000)) {
             player = levelUp(player);
         }
-        newState = moveToField(field, killEnemy(field, Object.assign({}, state, { player })));
+        newState = killEnemy(field, Object.assign({}, state, { player }));
+        newState = moveToField(newState.dungeon.map.getField(x, y), newState);
         if (enemy.boss) {
             newState.winner = true;
             return gameOver(newState);
@@ -182,6 +184,7 @@ function enterNextLevel(state: Object): Object {
 
 function takeAction(position: Point, state: Object) {
     const { x, y } = position;
+    if (state.dungeon.map.coordinatesOutOfBounds({ x, y })) return state;
     const field = state.dungeon.map.getField(x, y);
     const types = Types;
 

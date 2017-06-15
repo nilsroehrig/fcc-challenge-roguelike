@@ -148,6 +148,21 @@ function spawnEnemies(map, number) {
     return map.setFields(fields);
 }
 
+export function createMockDungeon() {
+    let map = new DungeonMap({ width: 11, height: 11 });
+    let r = new Room({
+        x: 6,
+        y: 6,
+        width: 9,
+        height: 9
+    });
+    map = placeRoom(r, map);
+    map = map.setField(map.getField(6, 6).setType(Types.player));
+    map = map.setField(map.getField(6, 5).setType(Types.weapon));
+    map = map.setField(map.getField(6, 4).setType(Types.enemy));
+    return { map, level: 1 };
+}
+
 function generate(level: number = 1, w: number = 50, h: number = 25) {
     const width = oddify(w);
     const height = oddify(h);
