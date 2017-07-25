@@ -1,8 +1,6 @@
 .Cell {
-    position: relative;
+    position: absolute;
     box-sizing: border-box;
-    width: 20px;
-    height: 20px;
     background-size: contain;
     background-image: url("../../resources/img/textures/gravel.jpg");
 }
@@ -19,7 +17,6 @@
 }
 
 .Cell--rock {
-    position: relative;
     z-index: 3;
     background-color: #666;
     background-image: url("../../resources/img/textures/blackbrick.jpg");

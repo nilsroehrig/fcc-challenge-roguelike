@@ -6,27 +6,39 @@ import Field from '../../game/map/fields/Field';
 
 import './Cell.css';
 
-function CellContent(props) {
-    return <div className="Cell__content" style={props.style} />;
-}
-
-function buildStyle(img) {
+function buildContentStyle(img) {
     if (img) {
         return { backgroundImage: `url("${img}")` };
     }
     return img;
 }
 
+function buildCellStyle(position, cellSize) {
+    const { x, y } = position;
+    return {
+        left: x * cellSize,
+        top: y * cellSize,
+        height: cellSize,
+        width: cellSize
+    };
+}
+
 export default function Cell(props) {
-    const style = buildStyle(props.field.getImage());
+    const contentStyle = buildContentStyle(props.field.getImage());
+    const cellStyle = buildCellStyle(props.field.getPosition(), props.cellSize);
     const type = TypesByCode[props.field.getType()];
     return (
-        <div className={`Cell Cell--${type}`}>
-            <CellContent style={style} />
+        <div className={`Cell Cell--${type}`} style={cellStyle}>
+            <div className="Cell__content" style={contentStyle} />
         </div>
     );
 }
 
 Cell.propTypes = {
-    field: PropTypes.instanceOf(Field).isRequired
+    field: PropTypes.instanceOf(Field).isRequired,
+    cellSize: PropTypes.number
+};
+
+Cell.defaultProps = {
+    cellSize: 40
 };
