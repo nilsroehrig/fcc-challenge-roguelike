@@ -1,6 +1,9 @@
 .App {
-    width: 60%;
+    width: calc(100vw - 2rem);
+    height: 100vh;
     margin: 0 auto;
+    display: flex;
+    flex-direction: column;
 }
 
 .App__headline {
@@ -15,6 +18,7 @@
     background-size: 20px 20px;
     border: solid thin #eee;
     overflow: hidden;
+    position: relative;
 }
 
 .App__footer {
