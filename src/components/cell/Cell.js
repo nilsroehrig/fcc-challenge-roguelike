@@ -26,9 +26,9 @@ function buildCellStyle(position, cellSize) {
 export default function Cell(props) {
     const contentStyle = buildContentStyle(props.field.getImage());
     const cellStyle = buildCellStyle(props.field.getPosition(), props.cellSize);
-    const type = TypesByCode[props.field.getType()];
+    const typeName = TypesByCode[props.field.getType()];
     return (
-        <div className={`Cell Cell--${type}`} style={cellStyle}>
+        <div className={`Cell Cell--${typeName}`} style={cellStyle}>
             <div className="Cell__content" style={contentStyle} />
         </div>
     );

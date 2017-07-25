@@ -28,9 +28,5 @@ export default function Board(props) {
 
 Board.propTypes = {
     map: PropTypes.instanceOf(DungeonMap).isRequired,
-    cellSize: PropTypes.number
-};
-
-Board.defaultProps = {
-    cellSize: 40
+    cellSize: PropTypes.number.isRequired
 };

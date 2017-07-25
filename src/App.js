@@ -28,6 +28,12 @@ export default class App extends Component {
         this.props.store.dispatch(action);
     }
 
+    getBackgroundSizeStyle() {
+        return {
+            backgroundSize: this.props.cellSize
+        };
+    }
+
     handleKeyPress(event) {
         window.requestAnimationFrame(() => {
             switch (event.keyCode) {
@@ -73,8 +79,8 @@ export default class App extends Component {
                     <h1 className="App__headline">DZC Roguelike</h1>
                     <StatsList {...player} dungeonLevel={dungeon.level} />
                 </header>
-                <div className="App__board-container">
-                    <Board {...dungeon} />
+                <div className="App__board-container" style={this.getBackgroundSizeStyle()}>
+                    <Board {...dungeon} cellSize={this.props.cellSize} />
                 </div>
                 {this.renderGameOver()}
                 <footer className="App__footer">
@@ -87,5 +93,10 @@ export default class App extends Component {
 
 App.propTypes = {
     store: PropTypes.object.isRequired,
-    appState: PropTypes.object.isRequired
+    appState: PropTypes.object.isRequired,
+    cellSize: PropTypes.number
+};
+
+App.defaultProps = {
+    cellSize: 40
 };
