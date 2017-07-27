@@ -28,7 +28,7 @@ function createNewLevel(level: number): Object {
         map.getField(enemy.position.x, enemy.position.y).setImage(enemy.img)
     );
     dungeon.map = map.setFields(enemyFields);
-    return { dungeon, enemies, position: { x, y } };
+    return { dungeon, enemies, playerPosition: { x, y } };
 }
 
 export function createInitialState(): Object {
@@ -43,7 +43,7 @@ export function createInitialState(): Object {
             attack: 10,
             weapon: getWeapon(0),
             level: 1,
-            position: level.position,
+            position: level.playerPosition,
             exp: 0
         }
     };

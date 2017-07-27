@@ -79,9 +79,7 @@ export default class App extends Component {
                     <h1 className="App__headline">DZC Roguelike</h1>
                     <StatsList {...player} dungeonLevel={dungeon.level} />
                 </header>
-                <div className="App__board-container" style={this.getBackgroundSizeStyle()}>
-                    <Board {...dungeon} cellSize={this.props.cellSize} />
-                </div>
+                <Board {...dungeon} player={player} cellSize={this.props.cellSize} />
                 {this.renderGameOver()}
                 <footer className="App__footer">
                     <p>Hero, Sword, Potion, Stairs icons are <a href="http://www.freepik.com">designed by Freepik</a></p>
