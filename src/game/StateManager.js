@@ -173,8 +173,8 @@ function pickUpWeapon(field: Field, state: Object): Object {
 }
 
 function enterNextLevel(state: Object): Object {
-    const { dungeon, enemies, position } = createNewLevel(state.dungeon.level + 1);
-    const player = Object.assign({}, state.player, { position });
+    const { dungeon, enemies, playerPosition } = createNewLevel(state.dungeon.level + 1);
+    const player = Object.assign({}, state.player, { position: playerPosition });
     return Object.assign({}, state, {
         dungeon,
         enemies,
