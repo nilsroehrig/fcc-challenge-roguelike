@@ -12,7 +12,14 @@ import './Row.css';
 export default function Row(props) {
     const cells = props.cells
         .filter(field => field.getType() !== Types.rock)
-        .map(cell => <Cell field={cell} key={cell.getId()} cellSize={props.cellSize} />);
+        .map(cell => (
+            <Cell
+                field={cell}
+                key={cell.getId()}
+                cellSize={props.cellSize}
+                cellPaddingTop={props.cellPaddingTop}
+                cellPaddingLeft={props.cellPaddingLeft}
+            />));
     return (
         <div className="Row">{cells}</div>
     );
@@ -20,5 +27,12 @@ export default function Row(props) {
 
 Row.propTypes = {
     cells: PropTypes.arrayOf(PropTypes.instanceOf(Field)).isRequired,
-    cellSize: PropTypes.number.isRequired
+    cellSize: PropTypes.number.isRequired,
+    cellPaddingTop: PropTypes.number,
+    cellPaddingLeft: PropTypes.number
 };
+
+Row.defaultProps = {
+    cellPaddingLeft: 0,
+    cellPaddingTop: 0
+}

@@ -13,11 +13,11 @@ function buildContentStyle(img) {
     return img;
 }
 
-function buildCellStyle(position, cellSize) {
+function buildCellStyle(position, cellSize, paddingLeft, paddingTop) {
     const { x, y } = position;
     return {
-        left: x * cellSize,
-        top: y * cellSize,
+        left: (x * cellSize) + paddingLeft,
+        top: (y * cellSize) + paddingTop,
         height: cellSize,
         width: cellSize
     };
@@ -25,7 +25,11 @@ function buildCellStyle(position, cellSize) {
 
 export default function Cell(props) {
     const contentStyle = buildContentStyle(props.field.getImage());
-    const cellStyle = buildCellStyle(props.field.getPosition(), props.cellSize);
+    const cellStyle = buildCellStyle(
+        props.field.getPosition(),
+        props.cellSize,
+        props.cellPaddingLeft,
+        props.cellPaddingTop);
     const typeName = TypesByCode[props.field.getType()];
     return (
         <div className={`Cell Cell--${typeName}`} style={cellStyle}>
@@ -36,7 +40,9 @@ export default function Cell(props) {
 
 Cell.propTypes = {
     field: PropTypes.instanceOf(Field).isRequired,
-    cellSize: PropTypes.number
+    cellSize: PropTypes.number,
+    cellPaddingTop: PropTypes.number.isRequired,
+    cellPaddingLeft: PropTypes.number.isRequired
 };
 
 Cell.defaultProps = {

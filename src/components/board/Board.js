@@ -11,15 +11,16 @@ export default class Board extends Component {
     constructor() {
         super();
         this.containerElement = null;
-        this.boardElement = null;
     }
 
     componentDidMount() {
         this.mapPlayerPositionToScrollPosition();
     }
 
-    componentDidUpdate() {
-        this.mapPlayerPositionToScrollPosition();
+    componentDidUpdate(prevProps) {
+        if (prevProps.player !== this.props.player) {
+            this.mapPlayerPositionToScrollPosition();
+        }
     }
 
     getBoardWidthInPx() {
@@ -35,13 +36,9 @@ export default class Board extends Component {
         const { x, y } = this.props.player.position;
         const cellSize = this.props.cellSize;
         const { width, height } = this.getBoardWidthInPx();
-        const containerRect = this.containerElement.getBoundingClientRect();
 
-        const scrollTop = height - (cellSize * y) - (cellSize / 2) - (containerRect.height / 2);
-        const scrollLeft = width - (cellSize * x) - (cellSize / 2) - (containerRect.width / 2);
-
-        this.containerElement.scrollTop = scrollTop + (height / 2);
-        this.containerElement.scrollLeft = scrollLeft + (width / 2);
+        this.containerElement.scrollTop = (height + ((y) * cellSize)) - (this.containerElement.clientHeight / 2);
+        this.containerElement.scrollLeft = (width + ((x) * cellSize)) - (this.containerElement.clientWidth / 2);
     }
 
     buildContainerStyle() {
@@ -52,12 +49,23 @@ export default class Board extends Component {
 
     buildBoardStyle() {
         const { width, height } = this.getBoardWidthInPx();
-        return { margin: `${height / 2}px ${width / 2}px`, width, height };
+        return {
+            padding: `${height}px ${width}px`,
+            width,
+            height
+        };
     }
 
     renderRows() {
+        const { width, height } = this.getBoardWidthInPx();
         return this.props.map.getState().mapData
-            .map(row => <Row cells={row} cellSize={this.props.cellSize} />);
+            .map(row => (
+                <Row
+                    cells={row}
+                    cellSize={this.props.cellSize}
+                    cellPaddingLeft={width}
+                    cellPaddingTop={height}
+                />));
     }
 
     render() {
@@ -65,7 +73,7 @@ export default class Board extends Component {
         return (
             /* eslint-disable no-return-assign */
             <div className="Board__container" style={this.buildContainerStyle()} ref={boardElement => this.containerElement = boardElement}>
-                <div className="Board__content" style={this.buildBoardStyle()} ref={boardElement => this.boardElement = boardElement}>
+                <div className="Board__content" style={this.buildBoardStyle()}>
             {/* eslint-enable */}
                     {rows}
                 </div>
