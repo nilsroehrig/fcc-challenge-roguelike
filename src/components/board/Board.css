@@ -1,0 +1,12 @@
+.Board__container {
+    margin-top: -1px;
+    background: transparent url("../../resources/img/textures/blackbrick.jpg") repeat left top;
+    border: solid thin #eee;
+    overflow: hidden;
+    flex: 1;
+}
+
+.Board__content {
+    margin: 0 auto;
+    position: relative;
+}
