@@ -78,3 +78,4 @@ typings/
 # development environments
 .idea
 /flow-typed/
+/.vscode/
