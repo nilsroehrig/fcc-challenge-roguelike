@@ -38,7 +38,7 @@ export default function Cell(props) {
     const classNames = ['Cell', `Cell--${typeName}`];
 
     if (d > 5) {
-        classNames.push('Cell--outOfSight');
+        return null;
     }
 
     return (

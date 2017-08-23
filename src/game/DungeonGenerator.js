@@ -1,6 +1,6 @@
 // @flow
+import shuffle from 'lodash.shuffle';
 import { Types } from './map/fields/FieldTypes';
-import { shuffle } from '../utils/ArrayUtils';
 import { createRandomRoomDimensions } from './map/RoomGenerator';
 import { oddify, randomIntBetween } from '../utils/MathUtils';
 
@@ -150,7 +150,7 @@ function spawnEnemies(map, number) {
 
 export function createMockDungeon() {
     let map = new DungeonMap({ width: 11, height: 11 });
-    let r = new Room({
+    const r = new Room({
         x: 6,
         y: 6,
         width: 9,
@@ -163,7 +163,7 @@ export function createMockDungeon() {
     return { map, level: 1 };
 }
 
-function generate(level: number = 1, w: number = 50, h: number = 25) {
+function generate(level: number = 1, w: number = 75, h: number = 40) {
     const width = oddify(w);
     const height = oddify(h);
 

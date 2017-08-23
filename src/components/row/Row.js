@@ -11,7 +11,7 @@ import './Row.css';
 
 export default function Row(props) {
     const cells = props.cells
-        .filter(field => field.getType() !== Types.rock)
+        // .filter(field => field.getType() !== Types.rock)
         .map(cell => (
             <Cell
                 field={cell}

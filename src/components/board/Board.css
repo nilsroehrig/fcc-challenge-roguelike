@@ -1,6 +1,6 @@
 .Board__container {
     margin-top: -1px;
-    background: transparent url("../../resources/img/textures/blackbrick.jpg") repeat left top;
+    background: black;
     border: solid thin #eee;
     overflow: hidden;
     flex: 1;

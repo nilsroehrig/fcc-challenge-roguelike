@@ -5,24 +5,25 @@
   "private": true,
   "dependencies": {
     "deep-freeze": "0.0.1",
+    "lodash.shuffle": "^4.2.0",
     "normalize.css": "^7.0.0",
     "prop-types": "^15.5.10",
-    "react": "^15.5.4",
-    "react-dom": "^15.5.4",
-    "react-redux": "^5.0.5",
-    "redux": "^3.6.0",
+    "react": "^15.6.1",
+    "react-dom": "^15.6.1",
+    "react-redux": "^5.0.6",
+    "redux": "^3.7.2",
     "redux-devtools": "^3.4.0",
-    "uuid": "^3.0.1"
+    "uuid": "^3.1.0"
   },
   "devDependencies": {
-    "eslint": "^3.19.0",
-    "eslint-config-airbnb": "^15.0.1",
-    "eslint-plugin-flowtype": "^2.34.0",
-    "flow-bin": "^0.47.0",
-    "flow-typed": "^2.1.2",
-    "react-scripts": "1.0.6",
-    "stylelint": "^7.10.1",
-    "stylelint-config-standard": "^16.0.0"
+    "eslint": "^4.5.0",
+    "eslint-config-airbnb": "^15.1.0",
+    "eslint-plugin-flowtype": "^2.35.0",
+    "flow-bin": "^0.53.1",
+    "flow-typed": "^2.1.5",
+    "react-scripts": "1.0.11",
+    "stylelint": "^8.0.0",
+    "stylelint-config-standard": "^17.0.0"
   },
   "scripts": {
     "start": "react-scripts start",
