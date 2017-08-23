@@ -19,6 +19,7 @@ export default function Row(props) {
                 cellSize={props.cellSize}
                 cellPaddingTop={props.cellPaddingTop}
                 cellPaddingLeft={props.cellPaddingLeft}
+                playerPosition={props.playerPosition}
             />));
     return (
         <div className="Row">{cells}</div>
@@ -29,7 +30,11 @@ Row.propTypes = {
     cells: PropTypes.arrayOf(PropTypes.instanceOf(Field)).isRequired,
     cellSize: PropTypes.number.isRequired,
     cellPaddingTop: PropTypes.number,
-    cellPaddingLeft: PropTypes.number
+    cellPaddingLeft: PropTypes.number,
+    playerPosition: PropTypes.shape({
+        x: PropTypes.number.isRequired,
+        y: PropTypes.number.isRequired
+    }).isRequired
 };
 
 Row.defaultProps = {

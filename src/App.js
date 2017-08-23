@@ -28,12 +28,6 @@ export default class App extends Component {
         this.props.store.dispatch(action);
     }
 
-    getBackgroundSizeStyle() {
-        return {
-            backgroundSize: this.props.cellSize
-        };
-    }
-
     handleKeyPress(event) {
         window.requestAnimationFrame(() => {
             switch (event.keyCode) {

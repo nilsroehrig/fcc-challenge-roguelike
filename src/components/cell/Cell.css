@@ -76,3 +76,7 @@
 .Cell--exit {
     background-color: purple;
 }
+
+.Cell--outOfSight {
+    display: none;
+}

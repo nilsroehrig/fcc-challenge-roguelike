@@ -37,8 +37,10 @@ export default class Board extends Component {
         const cellSize = this.props.cellSize;
         const { width, height } = this.getBoardWidthInPx();
 
-        this.containerElement.scrollTop = (height + ((y) * cellSize)) - (this.containerElement.clientHeight / 2);
-        this.containerElement.scrollLeft = (width + ((x) * cellSize)) - (this.containerElement.clientWidth / 2);
+        this.containerElement.scrollTop =
+            (height + ((y) * cellSize)) - (this.containerElement.clientHeight / 2);
+        this.containerElement.scrollLeft =
+            (width + ((x) * cellSize)) - (this.containerElement.clientWidth / 2);
     }
 
     buildContainerStyle() {
@@ -65,6 +67,7 @@ export default class Board extends Component {
                     cellSize={this.props.cellSize}
                     cellPaddingLeft={width}
                     cellPaddingTop={height}
+                    playerPosition={this.props.player.position}
                 />));
     }
 
