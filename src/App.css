@@ -5,11 +5,12 @@
     display: flex;
 }
 
-.App__gamedata {
+.App__game-data {
     margin-left: auto;
     display: flex;
+    flex-direction: column;
     order: 2;
-    flex: 5 5 auto;
+    width: calc((5 / 16) * 100%);
 }
 
 .App__headline {
@@ -23,7 +24,7 @@
 
 .App__board {
     margin-right: auto;
-    order: -1;
+    order: 1;
     overflow: hidden;
-    flex: 11 11 auto;
+    width: calc((11 / 16) * 100%);
 }

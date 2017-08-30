@@ -7,21 +7,27 @@ export default function StatsList(props) {
     return (
         <ul className="StatsList">
             <li className="StatsList__item">
-                Health: <strong>{props.health}</strong>
+                <span className="StatsList__attribute-name">Health:</span>
+                <strong>{props.health}</strong>
             </li>
             <li className="StatsList__item" title={`(base: ${props.attack}; weapon: ${props.weapon.attack})`}>
-                Attack: <strong>{props.attack + props.weapon.attack}</strong><br />
+                <span className="StatsList__attribute-name">Attack:</span>
+                <strong className="StatsList__attribute-value">{props.attack + props.weapon.attack}</strong>
             </li>
             <li className="StatsList__item" title={`(attack: ${props.weapon.attack}; crit chance: ${props.weapon.critChance}%)`}>
-                Weapon: <strong>{props.weapon.name}</strong>
+                <span className="StatsList__attribute-name">Weapon:</span>
+                <strong className="StatsList__attribute-value">{props.weapon.name}</strong>
             </li>
             <li className="StatsList__item">
-                Experience: <strong>{props.exp}</strong></li>
+                <span className="StatsList__attribute-name">Experience:</span>
+                <strong className="StatsList__attribute-value">{props.exp}</strong></li>
             <li className="StatsList__item">
-                Level: <strong>{props.level}</strong>
+                <span className="StatsList__attribute-name">Level:</span>
+                <strong className="StatsList__attribute-value">{props.level}</strong>
             </li>
             <li className="StatsList__item">
-                Dungeon: <strong>{props.dungeonLevel}</strong>
+                <span className="StatsList__attribute-name">Dungeon:</span>
+                <strong className="StatsList__attribute-value">{props.dungeonLevel}</strong>
             </li>
         </ul>
     );

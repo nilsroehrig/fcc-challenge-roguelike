@@ -1,15 +1,27 @@
 .StatsList {
-    margin: 0;
-    padding: 0;
+    margin: 1rem;
+    padding: 1rem;
     list-style: none;
-    display: flex;
-    border: solid thin #eee;
     color: #eee;
-    text-shadow: 1px 1px 0 black;
+    background-color: #111111;
+    border-radius: 0.25rem;
 }
 
 .StatsList__item {
-    box-sizing: border-box;
-    padding: 0.5rem 1.5rem;
-    border-right: solid thin #eee;
+    border-bottom: #eeeeee solid thin;
+    padding: 0.5rem 0;
+    display: flex;
+}
+
+.StatsList__item:first-child {
+    padding-top: 0;
+}
+
+.StatsList__item:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
+.StatsList__attribute-name {
+    flex-basis: 6rem;
 }
