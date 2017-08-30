@@ -1,0 +1,22 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Cell is not rendered when it is out of sight 1`] = `null`;
+
+exports[`Cell is rendered ehwn it is in sight 1`] = `
+<div
+  className="Cell Cell--earth"
+  style={
+    Object {
+      "height": 0,
+      "left": 0,
+      "top": 0,
+      "width": 0,
+    }
+  }
+>
+  <div
+    className="Cell__content"
+    style={undefined}
+  />
+</div>
+`;
