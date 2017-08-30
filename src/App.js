@@ -69,15 +69,19 @@ export default class App extends Component {
         const dungeon = this.props.appState.dungeon;
         return (
             <div className="App">
-                <header className="App__header">
-                    <h1 className="App__headline">DZC Roguelike</h1>
+                <div className="App__game-data">
+                    <header className="App__header">
+                        <h1 className="App__headline">DZC Roguelike</h1>
+                    </header>
                     <StatsList {...player} dungeonLevel={dungeon.level} />
-                </header>
-                <Board {...dungeon} player={player} cellSize={this.props.cellSize} />
+                    <footer className="App__footer">
+                        <p>Hero, Sword, Potion, Stairs icons are <a href="http://www.freepik.com">designed by Freepik</a></p>
+                    </footer>
+                </div>
+                <div className="App__board">
+                    <Board {...dungeon} player={player} cellSize={this.props.cellSize} />
+                </div>
                 {this.renderGameOver()}
-                <footer className="App__footer">
-                    <p>Hero, Sword, Potion, Stairs icons are <a href="http://www.freepik.com">designed by Freepik</a></p>
-                </footer>
             </div>
         );
     }

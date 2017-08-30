@@ -11,6 +11,9 @@ export default class Board extends Component {
     constructor() {
         super();
         this.containerElement = null;
+        this.setContainerElement = this.setContainerElement.bind(this);
+        this.buildBoardStyle = this.buildBoardStyle.bind(this);
+        this.buildContainerStyle = this.buildContainerStyle.bind(this);
     }
 
     componentDidMount() {
@@ -32,6 +35,16 @@ export default class Board extends Component {
         };
     }
 
+    setContainerElement(boardElement) {
+        this.containerElement = boardElement;
+    }
+
+    buildContainerStyle() {
+        return {
+            backgroundSize: this.props.cellSize
+        };
+    }
+
     mapPlayerPositionToScrollPosition() {
         const { x, y } = this.props.player.position;
         const cellSize = this.props.cellSize;
@@ -41,12 +54,6 @@ export default class Board extends Component {
             (height + ((y) * cellSize)) - (this.containerElement.clientHeight / 2);
         this.containerElement.scrollLeft =
             (width + ((x) * cellSize)) - (this.containerElement.clientWidth / 2);
-    }
-
-    buildContainerStyle() {
-        return {
-            backgroundSize: this.props.cellSize
-        };
     }
 
     buildBoardStyle() {
@@ -74,10 +81,8 @@ export default class Board extends Component {
     render() {
         const rows = this.renderRows();
         return (
-            /* eslint-disable no-return-assign */
-            <div className="Board__container" style={this.buildContainerStyle()} ref={boardElement => this.containerElement = boardElement}>
+            <div className="Board__container" style={this.buildContainerStyle()} ref={boardElement => this.setContainerElement(boardElement)}>
                 <div className="Board__content" style={this.buildBoardStyle()}>
-            {/* eslint-enable */}
                     {rows}
                 </div>
             </div>

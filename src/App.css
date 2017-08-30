@@ -1,9 +1,15 @@
 .App {
-    width: calc(100vw - 2rem);
+    width: 100vw;
     height: 100vh;
     margin: 0 auto;
     display: flex;
-    flex-direction: column;
+}
+
+.App__gamedata {
+    margin-left: auto;
+    display: flex;
+    order: 2;
+    flex: 5 5 auto;
 }
 
 .App__headline {
@@ -13,4 +19,11 @@
 
 .App__footer {
     font-size: 0.75rem;
+}
+
+.App__board {
+    margin-right: auto;
+    order: -1;
+    overflow: hidden;
+    flex: 11 11 auto;
 }
